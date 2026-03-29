@@ -1,0 +1,2494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artist Collage Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:wght@400;500;600&family=Sacramento&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    /* Default theme — cute & girly */
+    --bg: #fff7f9;
+    --surface: #ffffff;
+    --surface-hover: #fff0f3;
+    --border: #f0d6dc;
+    --text: #3d2b33;
+    --text-dim: #b89aa5;
+    --accent: #e8456b;
+    --accent-soft: #fce4ec;
+    --accent-glow: rgba(232, 69, 107, 0.12);
+    --gradient-1: #fce4ec;
+    --gradient-2: #f8bbd0;
+    --gradient-3: #f48fb1;
+    --sidebar-w: 230px;
+    --collage-bg: #fff5f7;
+    --collage-accent: #e8456b;
+    --collage-text: #3d2b33;
+    --deco-1: '🎀';
+    --deco-2: '✨';
+    --deco-3: '💖';
+  }
+
+  /* ── ARTIST THEMES ── */
+  body.theme-sabrina-carpenter {
+    --bg: #fff5f8;
+    --surface: #ffffff;
+    --surface-hover: #fff0f4;
+    --border: #f5c6d0;
+    --accent: #e84670;
+    --accent-soft: #fde8ef;
+    --accent-glow: rgba(232, 70, 112, 0.15);
+    --gradient-1: #fde8ef;
+    --gradient-2: #fbb4c9;
+    --gradient-3: #f48caa;
+    --collage-bg: #fff5f8;
+    --collage-accent: #e84670;
+  }
+
+  body.theme-billie-eilish {
+    --bg: #f4faf2;
+    --surface: #ffffff;
+    --surface-hover: #eef8eb;
+    --border: #c5e1b5;
+    --text: #1e3a1e;
+    --text-dim: #7ea07e;
+    --accent: #4caf50;
+    --accent-soft: #e8f5e9;
+    --accent-glow: rgba(76, 175, 80, 0.15);
+    --gradient-1: #e8f5e9;
+    --gradient-2: #a5d6a7;
+    --gradient-3: #66bb6a;
+    --collage-bg: #f1f9ef;
+    --collage-accent: #2e7d32;
+    --collage-text: #1e3a1e;
+    --deco-1: '🖤';
+    --deco-2: '🕷️';
+    --deco-3: '💚';
+  }
+
+  body.theme-taylor-swift {
+    --bg: #fdf8f0;
+    --surface: #ffffff;
+    --surface-hover: #fdf3e6;
+    --border: #e8d5b8;
+    --text: #4a3728;
+    --text-dim: #b8976e;
+    --accent: #c6842a;
+    --accent-soft: #fef3e2;
+    --accent-glow: rgba(198, 132, 42, 0.15);
+    --gradient-1: #fef3e2;
+    --gradient-2: #f5d5a0;
+    --gradient-3: #e6b86a;
+    --collage-bg: #fdf8f0;
+    --collage-accent: #b8762a;
+    --collage-text: #4a3728;
+    --deco-1: '⭐';
+    --deco-2: '🦋';
+    --deco-3: '💛';
+  }
+
+  body.theme-olivia-rodrigo {
+    --bg: #f9f2ff;
+    --surface: #ffffff;
+    --surface-hover: #f5eaff;
+    --border: #dcc5f0;
+    --text: #2e1a42;
+    --text-dim: #a07cc0;
+    --accent: #8e24aa;
+    --accent-soft: #f3e5f5;
+    --accent-glow: rgba(142, 36, 170, 0.15);
+    --gradient-1: #f3e5f5;
+    --gradient-2: #ce93d8;
+    --gradient-3: #ab47bc;
+    --collage-bg: #faf4ff;
+    --collage-accent: #7b1fa2;
+    --collage-text: #2e1a42;
+    --deco-1: '🔮';
+    --deco-2: '💜';
+    --deco-3: '🦋';
+  }
+
+  body.theme-bts {
+    --bg: #f0f0ff;
+    --surface: #ffffff;
+    --surface-hover: #eaeaff;
+    --border: #c5c5f0;
+    --text: #1a1a3e;
+    --text-dim: #8888bb;
+    --accent: #6c5ce7;
+    --accent-soft: #ededff;
+    --accent-glow: rgba(108, 92, 231, 0.15);
+    --gradient-1: #ededff;
+    --gradient-2: #b8b0f0;
+    --gradient-3: #8c7ee6;
+    --collage-bg: #f5f3ff;
+    --collage-accent: #5b4cdb;
+    --collage-text: #1a1a3e;
+    --deco-1: '💜';
+    --deco-2: '⟭⟬';
+    --deco-3: '✨';
+  }
+
+  body.theme-drake {
+    --bg: #f5f0ea;
+    --surface: #ffffff;
+    --surface-hover: #f0ebe4;
+    --border: #d9cfc2;
+    --text: #2c2418;
+    --text-dim: #a09080;
+    --accent: #8d6e4c;
+    --accent-soft: #f0e8dd;
+    --accent-glow: rgba(141, 110, 76, 0.15);
+    --gradient-1: #f0e8dd;
+    --gradient-2: #d4bfa8;
+    --gradient-3: #b8977a;
+    --collage-bg: #f8f4ee;
+    --collage-accent: #6d5038;
+    --collage-text: #2c2418;
+    --deco-1: '🦉';
+    --deco-2: '6';
+    --deco-3: '🔥';
+  }
+
+  body.theme-ariana-grande {
+    --bg: #fef6ff;
+    --surface: #ffffff;
+    --surface-hover: #fdf0ff;
+    --border: #ecc8f5;
+    --text: #3a1e42;
+    --text-dim: #be8ecc;
+    --accent: #d84be0;
+    --accent-soft: #fae8fc;
+    --accent-glow: rgba(216, 75, 224, 0.12);
+    --gradient-1: #fae8fc;
+    --gradient-2: #e8a8ee;
+    --gradient-3: #d66cde;
+    --collage-bg: #fef8ff;
+    --collage-accent: #c040cc;
+    --collage-text: #3a1e42;
+    --deco-1: '☁️';
+    --deco-2: '💅';
+    --deco-3: '💗';
+  }
+
+  body.theme-rene-rapp {
+    --bg: #f5f7ff;
+    --surface: #ffffff;
+    --surface-hover: #eef0ff;
+    --border: #c8ccf0;
+    --text: #1e2042;
+    --text-dim: #8085bb;
+    --accent: #4a50d4;
+    --accent-soft: #e8eaff;
+    --accent-glow: rgba(74, 80, 212, 0.15);
+    --gradient-1: #e8eaff;
+    --gradient-2: #b0b4f0;
+    --gradient-3: #7a80e6;
+    --collage-bg: #f5f5ff;
+    --collage-accent: #4a50d4;
+    --collage-text: #1e2042;
+  }
+
+  body.theme-zara-larsson {
+    --bg: #fff8f0;
+    --surface: #ffffff;
+    --surface-hover: #fff4e8;
+    --border: #f0d8b8;
+    --text: #42301a;
+    --text-dim: #c09060;
+    --accent: #e88a20;
+    --accent-soft: #fff0dd;
+    --accent-glow: rgba(232, 138, 32, 0.15);
+    --gradient-1: #fff0dd;
+    --gradient-2: #fdd8a0;
+    --gradient-3: #f0b860;
+    --collage-bg: #fffaf2;
+    --collage-accent: #d07818;
+    --collage-text: #42301a;
+  }
+
+  body.theme-pinkpantheress {
+    --bg: #fff5fa;
+    --surface: #ffffff;
+    --surface-hover: #fff0f6;
+    --border: #f0c0d8;
+    --text: #401830;
+    --text-dim: #c080a0;
+    --accent: #e050a0;
+    --accent-soft: #ffe8f4;
+    --accent-glow: rgba(224, 80, 160, 0.15);
+    --gradient-1: #ffe8f4;
+    --gradient-2: #f0a8d0;
+    --gradient-3: #e070b0;
+    --collage-bg: #fff5fa;
+    --collage-accent: #d04090;
+    --collage-text: #401830;
+  }
+
+  body.theme-tate-mcrae {
+    --bg: #f2f5f8;
+    --surface: #ffffff;
+    --surface-hover: #eaeff5;
+    --border: #c0ccd8;
+    --text: #1a2530;
+    --text-dim: #7890a5;
+    --accent: #3080c0;
+    --accent-soft: #e0eef8;
+    --accent-glow: rgba(48, 128, 192, 0.15);
+    --gradient-1: #e0eef8;
+    --gradient-2: #a0c8e8;
+    --gradient-3: #60a0d0;
+    --collage-bg: #f4f8fc;
+    --collage-accent: #2870b0;
+    --collage-text: #1a2530;
+  }
+
+  body.theme-sza {
+    --bg: #f0f8f5;
+    --surface: #ffffff;
+    --surface-hover: #e8f5ef;
+    --border: #b0d8c5;
+    --text: #1a3528;
+    --text-dim: #70a890;
+    --accent: #2e8b57;
+    --accent-soft: #e0f4ea;
+    --accent-glow: rgba(46, 139, 87, 0.15);
+    --gradient-1: #e0f4ea;
+    --gradient-2: #a0d8bb;
+    --gradient-3: #60b888;
+    --collage-bg: #f2faf5;
+    --collage-accent: #267a4a;
+    --collage-text: #1a3528;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND DECORATIONS ── */
+  /* Base ambient glow */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -30%;
+    right: -20%;
+    width: 70vw;
+    height: 70vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--gradient-1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* Floating decorative shapes layer */
+  .bg-decor {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .bg-decor span {
+    position: absolute;
+    opacity: 0;
+    animation: floatUp 12s ease-in-out infinite;
+    font-size: 1.6rem;
+    filter: blur(0.5px);
+  }
+
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(100vh) rotate(0deg); }
+    10%  { opacity: 0.25; }
+    90%  { opacity: 0.25; }
+    100% { opacity: 0; transform: translateY(-10vh) rotate(360deg); }
+  }
+
+  /* ── PER-ARTIST AESTHETIC PATTERNS ── */
+
+  /* Sabrina Carpenter — bows, hearts, soft ribbons */
+  body.theme-sabrina-carpenter .main-content {
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(253,200,220,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(248,180,200,0.2) 0%, transparent 50%);
+  }
+
+  /* Billie Eilish — moody lines, angular */
+  body.theme-billie-eilish .main-content {
+    background-image:
+      repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(76,175,80,0.03) 60px, rgba(76,175,80,0.03) 61px),
+      repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(46,125,50,0.02) 80px, rgba(46,125,50,0.02) 81px),
+      radial-gradient(ellipse at 70% 10%, rgba(200,230,201,0.3) 0%, transparent 50%);
+  }
+
+  /* Taylor Swift — scattered sparkle dots */
+  body.theme-taylor-swift .main-content {
+    background-image:
+      radial-gradient(circle at 15% 30%, rgba(245,213,160,0.3) 0%, transparent 30%),
+      radial-gradient(circle at 85% 20%, rgba(230,184,106,0.2) 0%, transparent 25%),
+      radial-gradient(circle at 50% 70%, rgba(254,243,226,0.4) 0%, transparent 40%);
+  }
+
+  /* Olivia Rodrigo — punk sticker energy, splashy */
+  body.theme-olivia-rodrigo .main-content {
+    background-image:
+      radial-gradient(ellipse at 10% 90%, rgba(206,147,216,0.25) 0%, transparent 40%),
+      radial-gradient(ellipse at 90% 10%, rgba(171,71,188,0.15) 0%, transparent 35%),
+      repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(142,36,170,0.015) 100px, rgba(142,36,170,0.015) 101px);
+  }
+
+  /* Rene Rapp — clean theatrical spotlight */
+  body.theme-rene-rapp .main-content {
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(176,180,240,0.3) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(232,234,255,0.2) 0%, transparent 40%);
+  }
+
+  /* Zara Larsson — warm golden sun rays */
+  body.theme-zara-larsson .main-content {
+    background-image:
+      conic-gradient(from 200deg at 80% 20%, rgba(253,216,160,0.15) 0deg, transparent 40deg, transparent 160deg, rgba(240,184,96,0.1) 200deg, transparent 240deg),
+      radial-gradient(ellipse at 20% 80%, rgba(255,240,221,0.4) 0%, transparent 50%);
+  }
+
+  /* PinkPantheress — Y2K bubbles */
+  body.theme-pinkpantheress .main-content {
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(240,168,208,0.2) 0%, transparent 20%),
+      radial-gradient(circle at 70% 20%, rgba(224,112,176,0.15) 0%, transparent 15%),
+      radial-gradient(circle at 40% 70%, rgba(255,232,244,0.3) 0%, transparent 25%),
+      radial-gradient(circle at 85% 65%, rgba(240,168,208,0.2) 0%, transparent 18%),
+      radial-gradient(circle at 55% 45%, rgba(224,80,160,0.08) 0%, transparent 20%);
+  }
+
+  /* Tate McRae — cool steel, sharp diagonals */
+  body.theme-tate-mcrae .main-content {
+    background-image:
+      repeating-linear-gradient(160deg, transparent, transparent 120px, rgba(48,128,192,0.02) 120px, rgba(48,128,192,0.02) 122px),
+      radial-gradient(ellipse at 70% 30%, rgba(160,200,232,0.25) 0%, transparent 45%),
+      linear-gradient(180deg, rgba(224,238,248,0.3) 0%, transparent 40%);
+  }
+
+  /* SZA — organic, earthy, flowing */
+  body.theme-sza .main-content {
+    background-image:
+      radial-gradient(ellipse at 30% 60%, rgba(160,216,187,0.25) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 20%, rgba(96,184,136,0.15) 0%, transparent 30%),
+      radial-gradient(ellipse at 10% 10%, rgba(224,244,234,0.3) 0%, transparent 35%);
+  }
+
+  /* Ariana Grande — dreamy clouds */
+  body.theme-ariana-grande .main-content {
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(232,168,238,0.2) 0%, transparent 30%),
+      radial-gradient(ellipse at 60% 40%, rgba(250,232,252,0.3) 0%, transparent 35%),
+      radial-gradient(ellipse at 85% 70%, rgba(214,108,222,0.1) 0%, transparent 25%),
+      radial-gradient(ellipse at 40% 80%, rgba(250,232,252,0.25) 0%, transparent 30%);
+  }
+
+  /* ── LAYOUT ── */
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.03);
+  }
+
+  .sidebar-header {
+    padding: 1.4rem 1.2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--gradient-1), var(--surface));
+  }
+
+  .sidebar-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .sidebar-header h2 span { color: var(--accent); }
+
+  .sidebar-header p {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  .history-label {
+    padding: 1rem 1.2rem 0.5rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0.5rem;
+  }
+
+  .history-list:empty::after {
+    content: 'Search for an artist to get started ✨';
+    display: block;
+    padding: 1.2rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+  }
+
+  .history-item:hover { background: var(--surface-hover); }
+
+  .history-item.active {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+  }
+
+  .history-thumb {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: var(--gradient-1);
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .history-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+
+  .history-clear {
+    padding: 0.8rem 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .history-clear button {
+    width: 100%;
+    padding: 0.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .history-clear button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* ── MAIN ── */
+  .main-content {
+    flex: 1;
+    margin-left: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── SEARCH PANEL ── */
+  .search-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    width: 100%;
+    transition: min-height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                padding 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.has-results .search-panel {
+    min-height: auto;
+    padding: 2rem 2rem 1rem;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    transition: margin 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.has-results .brand { margin-bottom: 1rem; }
+
+  .brand-deco {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    transition: font-size 0.5s;
+  }
+
+  body.has-results .brand-deco { font-size: 1.2rem; }
+
+  .brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    transition: font-size 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  body.has-results .brand h1 {
+    font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+  }
+
+  .brand h1 em {
+    font-family: 'Sacramento', cursive;
+    font-style: normal;
+    color: var(--accent);
+    font-size: 1.2em;
+  }
+
+  .brand p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-top: 0.6rem;
+    transition: opacity 0.4s, height 0.4s;
+  }
+
+  body.has-results .brand p {
+    opacity: 0; height: 0; margin: 0; overflow: hidden;
+  }
+
+  /* ── SEARCH FORM ── */
+  .search-form {
+    display: flex;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .search-form input {
+    flex: 1;
+    padding: 0.95rem 1.3rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-right: none;
+    border-radius: 14px 0 0 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .search-form input::placeholder { color: var(--text-dim); }
+
+  .search-form input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .search-form button {
+    padding: 0.95rem 1.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 0 14px 14px 0;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.1s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+
+  .search-form button:hover { filter: brightness(1.1); }
+  .search-form button:active { transform: scale(0.97); }
+
+  /* ── QUICK PICKS ── */
+  .quick-picks {
+    margin-top: 1.5rem;
+    text-align: center;
+    max-width: 560px;
+    width: 100%;
+    transition: margin 0.4s, opacity 0.4s;
+  }
+
+  body.has-results .quick-picks {
+    margin-top: 0.6rem;
+  }
+
+  .quick-picks-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+
+  body.has-results .quick-picks-label { display: none; }
+
+  .quick-picks-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+
+  .quick-pick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .quick-pick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 12px var(--accent-glow);
+  }
+
+  .quick-pick-btn .qp-emoji {
+    font-size: 0.9rem;
+  }
+
+  /* ── DISCOGRAPHY STRIP ── */
+  .discography {
+    display: none;
+    width: 100%;
+    max-width: 780px;
+    padding: 0 2rem 0.5rem;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .discography.active { display: flex; }
+
+  .discography-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+    padding-left: 0.2rem;
+  }
+
+  .discography-scroll {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .discography-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .discography-scroll::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 2px;
+  }
+
+  .discography-scroll::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  .disco-album {
+    flex-shrink: 0;
+    width: 90px;
+    text-align: center;
+    cursor: default;
+    scroll-snap-align: start;
+    transition: transform 0.2s;
+  }
+
+  .disco-album:hover { transform: translateY(-2px); }
+
+  .disco-album img {
+    width: 90px;
+    height: 90px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .disco-album:hover img {
+    border-color: var(--accent);
+  }
+
+  .disco-album .disco-title {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 0.3rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .disco-album .disco-year {
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    margin-top: 0.1rem;
+  }
+
+  /* ── CANDIDATE POOL PANEL ── */
+  .candidates-panel {
+    display: none;
+    width: 100%;
+    max-width: 780px;
+    padding: 0 2rem 1rem;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .candidates-panel.active { display: flex; }
+
+  .candidates-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .candidates-label span {
+    font-size: 0.72rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0.1rem 0.5rem;
+    border-radius: 8px;
+  }
+
+  .candidates-scroll {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.3rem 0 0.5rem;
+    scroll-snap-type: x mandatory;
+  }
+
+  .candidates-scroll::-webkit-scrollbar { height: 4px; }
+  .candidates-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 2px; }
+  .candidates-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  .candidate-thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    scroll-snap-align: start;
+    background: var(--gradient-1);
+  }
+
+  .candidate-thumb:hover {
+    border-color: var(--accent);
+    transform: scale(1.08);
+    box-shadow: 0 3px 12px var(--accent-glow);
+  }
+
+  /* score badge on candidates */
+  .candidate-item {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .candidate-score {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* ── LOADING ── */
+  .loader {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 4rem 2rem;
+  }
+  .loader.active { display: flex; }
+
+  .loader-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loader p {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+
+  /* ── ERROR ── */
+  .error-msg {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-dim);
+  }
+  .error-msg.active { display: block; }
+  .error-msg h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: none;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.8rem 2rem 1.5rem;
+  }
+  .toolbar.active { display: flex; }
+
+  .toolbar button {
+    padding: 0.6rem 1.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toolbar button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .toolbar button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .toolbar button.primary:hover { filter: brightness(1.1); }
+
+  /* ── COLLAGE WRAPPER ── */
+  .collage-wrapper {
+    display: none;
+    justify-content: center;
+    padding: 0 2rem 4rem;
+  }
+  .collage-wrapper.active { display: flex; }
+
+  /* ── THE COLLAGE: exactly letter portrait ── */
+  .collage {
+    width: 8.5in;
+    height: 11in;
+    background: var(--collage-bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    border-radius: 4px;
+  }
+
+  /* decorative corner bows / elements */
+  .collage .deco-corner {
+    position: absolute;
+    font-size: 28pt;
+    z-index: 20;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .collage .deco-tl { top: 0.2in; left: 0.25in; }
+  .collage .deco-tr { top: 0.2in; right: 0.25in; }
+  .collage .deco-bl { bottom: 0.2in; left: 0.25in; }
+  .collage .deco-br { bottom: 0.2in; right: 0.25in; }
+
+  .collage-header {
+    padding: 0.4in 0.5in 0.15in;
+    flex-shrink: 0;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+  }
+
+  .collage-artist-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--collage-text, #222);
+    text-transform: uppercase;
+  }
+
+  .collage-script {
+    font-family: 'Sacramento', cursive;
+    color: var(--collage-accent);
+    font-size: 22pt;
+    margin-top: 0.04in;
+  }
+
+  .collage-subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 7pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-top: 0.05in;
+  }
+
+  .collage-divider {
+    height: 2px;
+    margin: 0.08in 0.8in;
+    background: linear-gradient(90deg, transparent, var(--collage-accent), transparent);
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+
+  /* ── MOSAIC ── */
+  .collage-mosaic {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 4px;
+    padding: 0.12in 0.4in;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+    grid-auto-rows: 1fr;
+  }
+
+  .mosaic-item {
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-1);
+    border-radius: 4px;
+  }
+
+  .mosaic-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .mosaic-item .tile-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 16px 6px 4px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.55));
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 5.5pt;
+    font-weight: 600;
+    line-height: 1.2;
+    opacity: 0;
+    transition: opacity 0.25s;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .mosaic-item:hover .tile-label { opacity: 1; }
+
+  .mosaic-item .tile-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.15s;
+    z-index: 15;
+    padding: 0;
+    font-family: sans-serif;
+  }
+
+  .mosaic-item:hover .tile-remove { opacity: 1; }
+  .mosaic-item .tile-remove:hover { background: rgba(220,40,40,0.85); }
+
+  .collage-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.06in 0.5in 0.3in;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 6pt;
+    color: #ccc;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  /* ── TILE SIZES ── */
+  .mosaic-item.sz-hero   { grid-column: span 6; grid-row: span 2; }
+  .mosaic-item.sz-large  { grid-column: span 4; grid-row: span 2; }
+  .mosaic-item.sz-medium { grid-column: span 4; grid-row: span 1; }
+  .mosaic-item.sz-wide   { grid-column: span 6; grid-row: span 1; }
+  .mosaic-item.sz-small  { grid-column: span 3; grid-row: span 1; }
+  .mosaic-item.sz-tiny   { grid-column: span 2; grid-row: span 1; }
+
+  /* ── ANIMATION ── */
+  .collage-wrapper.active {
+    animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .mosaic-item {
+    animation: tileIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes tileIn {
+    from { opacity: 0; transform: scale(0.93); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar, .search-panel, .toolbar, .loader, .error-msg, .quick-picks, .bg-decor, .discography, .candidates-panel {
+      display: none !important;
+    }
+    body { background: #fff; margin: 0; padding: 0; }
+    body::after { display: none; }
+    .main-content { margin-left: 0; }
+    .collage-wrapper {
+      display: flex !important;
+      padding: 0;
+      animation: none;
+    }
+    .collage {
+      width: 8.5in;
+      height: 11in;
+      box-shadow: none;
+      border-radius: 0;
+      page-break-inside: avoid;
+    }
+    .mosaic-item {
+      animation: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .mosaic-item .tile-label { display: none; }
+    .mosaic-item .tile-remove { display: none; }
+    .collage .deco-corner,
+    .collage-divider,
+    .collage-header,
+    .collage-footer {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-decor" id="bgDecor"></div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Collage<span>.</span></h2>
+      <p>poster maker</p>
+    </div>
+    <div class="history-label">Recent Artists</div>
+    <div class="history-list" id="historyList"></div>
+    <div class="history-clear">
+      <button id="clearHistoryBtn">Clear History</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="search-panel">
+      <div class="brand">
+        <div class="brand-deco">🎀</div>
+        <h1>Artist <em>Collage</em></h1>
+        <p>Search any artist and get a printable poster</p>
+      </div>
+      <form class="search-form" id="searchForm">
+        <input type="text" id="artistInput" placeholder="Sabrina Carpenter, Ariana Grande Positions ..." autocomplete="off" autofocus>
+        <button type="submit">Make It ✨</button>
+      </form>
+
+      <div class="quick-picks">
+        <div class="quick-picks-label">or pick one</div>
+        <div class="quick-picks-grid" id="quickPicksGrid"></div>
+      </div>
+    </div>
+
+    <div class="discography" id="discography">
+      <div class="discography-label">Discography</div>
+      <div class="discography-scroll" id="discographyScroll"></div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="loader-spinner"></div>
+      <p>Searching for artist...</p>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+      <h3>No Results Found</h3>
+      <p>Try a different artist name or check spelling.</p>
+    </div>
+
+    <div class="toolbar" id="toolbar">
+      <button class="primary" onclick="window.print()">🖨️ Print Collage</button>
+      <button id="refreshBtn">🔄 Refresh</button>
+      <button onclick="document.getElementById('artistInput').focus(); document.getElementById('artistInput').select();">New Search</button>
+    </div>
+
+    <div class="candidates-panel" id="candidatesPanel">
+      <div class="candidates-label">Swap in alternatives <span id="candidateCount">0</span></div>
+      <div class="candidates-scroll" id="candidatesScroll"></div>
+    </div>
+
+    <div class="collage-wrapper" id="collageWrapper">
+      <div class="collage" id="collage"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Load face-api.js asynchronously — don't block the page
+(function() {
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/dist/face-api.js';
+  s.async = true;
+  s.onerror = () => console.warn('face-api.js failed to load — face detection disabled');
+  document.head.appendChild(s);
+})();
+</script>
+<script>
+const form        = document.getElementById('searchForm');
+const input       = document.getElementById('artistInput');
+const loader      = document.getElementById('loader');
+const errorMsg    = document.getElementById('errorMsg');
+const toolbar     = document.getElementById('toolbar');
+const wrapper     = document.getElementById('collageWrapper');
+const collageEl   = document.getElementById('collage');
+const historyList = document.getElementById('historyList');
+const clearBtn    = document.getElementById('clearHistoryBtn');
+const discography = document.getElementById('discography');
+const discoScroll = document.getElementById('discographyScroll');
+
+/* ═══════════════════════════════════════════
+   IMAGE SCORING & TAGGING SYSTEM
+   Scores 0-100, assigns descriptive tags.
+   ═══════════════════════════════════════════ */
+function scoreAndTag(img, src) {
+  let score = 0;
+  const tags = [];
+
+  // ── SOURCE RELIABILITY (0-30) ──
+  const srcScores = {
+    'wiki-main': 30, 'itunes-album': 25, 'wiki-cat': 22,
+    'itunes-single': 20, 'itunes-video': 15, 'wiki-search': 8,
+  };
+  score += srcScores[src] || 5;
+  tags.push(src.startsWith('wiki') ? 'web-photo' : 'music-source');
+
+  // ── DIMENSIONS (0-15) ──
+  if (img.dims) {
+    const minDim = Math.min(img.dims[0], img.dims[1]);
+    score += Math.min(Math.floor(minDim / 50), 15);
+    if (minDim >= 800) tags.push('high-res');
+  } else if (src.startsWith('itunes')) {
+    score += 12; // iTunes 600x600 default
+  }
+
+  // ── ASPECT RATIO (0-10) ──
+  if (img.dims) {
+    const ratio = img.dims[0] / img.dims[1];
+    if (ratio >= 0.65 && ratio <= 0.85) { score += 10; tags.push('portrait-ratio'); }
+    else if (ratio >= 0.95 && ratio <= 1.05) { score += 8; tags.push('square'); }
+    else if (ratio >= 0.5 && ratio <= 1.2) { score += 5; }
+    else if (ratio >= 1.2 && ratio <= 1.8) { score += 3; tags.push('wide'); }
+    if (ratio < 0.7) tags.push('tall');
+  } else if (src.startsWith('itunes')) {
+    score += 8; tags.push('square'); // iTunes art is square
+  }
+
+  // ── FILENAME SIGNALS (0-20) ──
+  const title = (img.title || img.label || '').toLowerCase();
+  const posWords = { press: 12, promo: 12, portrait: 12, headshot: 12,
+    concert: 8, live: 8, perform: 8, festival: 8, tour: 8,
+    award: 10, premiere: 10, 'red carpet': 10, gala: 10, ceremony: 10,
+    interview: 6, appearance: 6 };
+  const negWords = { crop: -8, cropped: -8, blur: -15, fan: -15,
+    unofficial: -15, 'fan art': -20, fanart: -20, drawing: -20,
+    illustration: -20, cartoon: -20, anime: -20, screenshot: -15,
+    poster: -12, wicked: -10, logo: -20, icon: -20, banner: -15 };
+
+  let titleBonus = 0;
+  for (const [w, pts] of Object.entries(posWords)) {
+    if (title.includes(w)) { titleBonus = Math.max(titleBonus, pts); break; }
+  }
+  for (const [w, pts] of Object.entries(negWords)) {
+    if (title.includes(w)) { titleBonus += pts; }
+  }
+  score += Math.max(0, Math.min(20, titleBonus));
+
+  // Assign content-type tag
+  if (src === 'itunes-album') tags.push('album-art');
+  else if (src === 'itunes-single') tags.push('single-art');
+  else if (src === 'itunes-video') tags.push('video-still');
+  else if (src === 'wiki-main') tags.push('press-photo');
+  else if (/concert|live|perform|festival|tour/.test(title)) tags.push('live-performance');
+  else if (/award|premiere|carpet|gala|ceremony/.test(title)) tags.push('event-photo');
+  else if (/press|promo/.test(title)) tags.push('press-photo');
+  else tags.push('photo');
+
+  // ── METADATA RICHNESS (0-15) ──
+  if (img.photographer) score += 4;
+  if (img.license) score += 3;
+  if (img.hasExifDate) score += 3;
+  if (img.hasCategoryMatch) score += 3;
+  if (img.descLength > 20) score += 2;
+  if (src.startsWith('itunes')) score += 10; // all iTunes = professional
+
+  // ── RECENCY (0-10) ──
+  if (img.year) {
+    const age = new Date().getFullYear() - img.year;
+    if (age <= 2) { score += 10; tags.push('recent'); }
+    else if (age <= 5) score += 7;
+    else if (age <= 10) score += 4;
+    else { score += 1; tags.push('classic'); }
+  } else {
+    score += 2;
+  }
+
+  // ── NEGATIVE: likely not the right person ──
+  if (negWords && titleBonus < -10) score = Math.max(score, 5); // floor at 5
+
+  img.score = Math.max(0, Math.min(100, score));
+  img.tags = tags;
+  img.src = src;
+  return img;
+}
+
+/* ═══════════════════════════════════════════
+   IMAGE CACHE (localStorage)
+   Caches scored/tagged images per artist.
+   ═══════════════════════════════════════════ */
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function cacheKey(name) {
+  return 'acm_' + name.toLowerCase().trim().replace(/\s+/g, '_');
+}
+
+function loadCache(artistName) {
+  try {
+    const raw = localStorage.getItem(cacheKey(artistName));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > CACHE_TTL) { localStorage.removeItem(cacheKey(artistName)); return null; }
+    return data;
+  } catch { return null; }
+}
+
+function saveCache(artistName, artistId, images, albums) {
+  try {
+    const data = { v: 1, ts: Date.now(), artistId, artistName, images, albums };
+    localStorage.setItem(cacheKey(artistName), JSON.stringify(data));
+  } catch (e) {
+    // Storage full — evict oldest
+    evictOldCaches();
+    try { localStorage.setItem(cacheKey(artistName), JSON.stringify({ v: 1, ts: Date.now(), artistId, artistName, images, albums })); }
+    catch {}
+  }
+}
+
+function evictOldCaches() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k?.startsWith('acm_') && k !== 'acm_cache_index') {
+      try {
+        const d = JSON.parse(localStorage.getItem(k));
+        keys.push({ k, ts: d.ts || 0 });
+      } catch {}
+    }
+  }
+  keys.sort((a, b) => a.ts - b.ts);
+  // Remove oldest 5
+  for (let i = 0; i < Math.min(5, keys.length); i++) localStorage.removeItem(keys[i].k);
+}
+
+/* ═══════════════════════════════════════════
+   FACE DETECTION (head-crop analysis)
+   ═══════════════════════════════════════════ */
+let faceDetectorLoaded = false;
+
+async function loadFaceDetector() {
+  if (faceDetectorLoaded) return;
+  if (typeof faceapi === 'undefined') {
+    console.warn('face-api.js not loaded yet — skipping face detection');
+    return;
+  }
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(
+      'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1/model/'
+    );
+    faceDetectorLoaded = true;
+  } catch (e) {
+    console.warn('Face detection model load failed:', e.message);
+  }
+}
+
+// Returns a penalty (0 = fine, -15 = head likely cut off, -25 = no face found in photo)
+async function checkHeadCrop(imgUrl, isPhotoType) {
+  if (!faceDetectorLoaded || typeof faceapi === 'undefined') return 0;
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      setTimeout(reject, 4000);
+      img.src = imgUrl;
+    });
+
+    const detections = await faceapi.detectAllFaces(img,
+      new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 })
+    );
+
+    if (detections.length === 0) {
+      return isPhotoType ? -15 : 0; // Missing face in a "photo" is bad
+    }
+
+    // Check if the main face is cut off
+    const face = detections[0].box;
+    const h = img.height;
+    const w = img.width;
+
+    // Forehead cut off: top of face box is very close to top edge
+    if (face.y < h * 0.03) return -15;
+    // Chin cut off: bottom of face near bottom edge
+    if (face.y + face.height > h * 0.97) return -10;
+    // Face too close to left/right edge (side crop)
+    if (face.x < w * 0.03 || face.x + face.width > w * 0.97) return -8;
+
+    return 5; // Bonus: confirmed good face positioning
+  } catch {
+    return 0; // Can't load image, no penalty
+  }
+}
+
+/* ═══════════════════════════════════════════
+   DISCOGS FETCH (via server proxy)
+   ═══════════════════════════════════════════ */
+async function fetchDiscogsImages(artistName) {
+  const photos = [];
+  try {
+    // Search for the artist on Discogs
+    const searchResp = await fetch(
+      `/api/proxy/discogs/artist?q=${encodeURIComponent(artistName)}`
+    );
+    if (!searchResp.ok) return photos;
+    const searchData = await searchResp.json();
+
+    const match = (searchData.results || []).find(r => {
+      const n = r.title?.toLowerCase() || '';
+      const s = artistName.toLowerCase();
+      return n === s || n.includes(s) || s.includes(n);
+    });
+
+    if (!match) return photos;
+
+    // Fetch artist detail for images
+    const detailResp = await fetch(`/api/proxy/discogs/images/${match.id}`);
+    if (!detailResp.ok) return photos;
+    const detail = await detailResp.json();
+
+    const seenUrls = new Set();
+    for (const img of (detail.images || [])) {
+      if (img.type !== 'primary' && img.type !== 'secondary') continue;
+      if (!img.uri || img.width < 300 || img.height < 300) continue;
+      if (seenUrls.has(img.uri)) continue;
+      seenUrls.add(img.uri);
+
+      // Use proxy for the image URL since Discogs blocks CORS
+      const proxiedUrl = `/api/proxy/image?url=${encodeURIComponent(img.uri)}`;
+
+      const photo = {
+        art: proxiedUrl,
+        label: artistName + ' (Discogs)',
+        title: `discogs ${img.type} photo`,
+        type: 'photo',
+        dims: [img.width, img.height],
+      };
+      scoreAndTag(photo, 'wiki-cat'); // Score similar to curated category
+      photos.push(photo);
+    }
+  } catch (e) {
+    // Server might not be running — Discogs won't work in static file mode
+  }
+  return photos;
+}
+
+/* ═══════════════════════════════════════════
+   QUALITY DB INTEGRATION
+   ═══════════════════════════════════════════ */
+let dbAvailable = false;
+
+async function checkDbAvailable() {
+  try {
+    const resp = await fetch('/api/quality/test', { method: 'GET' });
+    dbAvailable = resp.ok;
+  } catch {
+    dbAvailable = false;
+  }
+}
+checkDbAvailable();
+
+async function recordSignal(url, artist, action) {
+  if (!dbAvailable) return;
+  try {
+    await fetch('/api/signal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, artist: artist.toLowerCase(), action }),
+    });
+  } catch {}
+}
+
+async function getQualitySignals(artist) {
+  if (!dbAvailable) return { rejected: [], preferred: [] };
+  try {
+    const resp = await fetch(`/api/quality/${encodeURIComponent(artist.toLowerCase())}`);
+    if (resp.ok) return await resp.json();
+  } catch {}
+  return { rejected: [], preferred: [] };
+}
+
+async function saveImagesToDB(images, artist) {
+  if (!dbAvailable) return;
+  try {
+    await fetch('/api/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        artist: artist.toLowerCase(),
+        images: images.map(i => ({ url: i.art, source: i.src || '', score: i.score || 0 }))
+      }),
+    });
+  } catch {}
+}
+
+/* ═══════════════════════════════════════════
+   CANDIDATE POOL STATE
+   ═══════════════════════════════════════════ */
+let currentCandidatePool = [];
+let currentSelectedImages = [];
+let currentArtistName = '';
+let currentTheme = null;
+let currentAlbumFilter = null;
+
+const candidatesPanel = document.getElementById('candidatesPanel');
+const candidatesScroll = document.getElementById('candidatesScroll');
+const candidateCountEl = document.getElementById('candidateCount');
+const refreshBtn = document.getElementById('refreshBtn');
+
+function renderCandidatePool() {
+  candidatesScroll.innerHTML = '';
+  // Show images NOT in the current collage
+  const selectedUrls = new Set(currentSelectedImages.map(i => i.art));
+  const alternates = currentCandidatePool
+    .filter(i => !selectedUrls.has(i.art))
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 30);
+
+  candidateCountEl.textContent = alternates.length;
+
+  alternates.forEach(img => {
+    const wrap = document.createElement('div');
+    wrap.className = 'candidate-item';
+
+    const thumb = document.createElement('img');
+    thumb.className = 'candidate-thumb';
+    thumb.src = img.art;
+    thumb.alt = img.label || '';
+    thumb.loading = 'lazy';
+    thumb.title = `Score: ${img.score || 0} | ${img.tags?.join(', ') || img.type}`;
+
+    const scoreBadge = document.createElement('div');
+    scoreBadge.className = 'candidate-score';
+    scoreBadge.textContent = img.score || 0;
+
+    thumb.addEventListener('click', () => swapInCandidate(img));
+
+    wrap.appendChild(thumb);
+    wrap.appendChild(scoreBadge);
+    candidatesScroll.appendChild(wrap);
+  });
+}
+
+function swapInCandidate(newImg) {
+  // Replace the lowest-scored image in the collage
+  if (currentSelectedImages.length === 0) return;
+
+  let worstIdx = 0;
+  let worstScore = Infinity;
+  currentSelectedImages.forEach((img, i) => {
+    if ((img.score || 0) < worstScore) { worstScore = img.score || 0; worstIdx = i; }
+  });
+
+  const removed = currentSelectedImages[worstIdx];
+  currentSelectedImages[worstIdx] = newImg;
+
+  // Record signals
+  recordSignal(removed.art, currentArtistName, 'swap_out');
+  recordSignal(newImg.art, currentArtistName, 'swap_in');
+
+  // Rebuild collage
+  buildCollage(
+    currentAlbumFilter ? `${currentArtistName}: ${currentAlbumFilter}` : currentArtistName,
+    currentSelectedImages, currentTheme
+  );
+  renderCandidatePool();
+}
+
+// Refresh button bypasses cache
+refreshBtn?.addEventListener('click', () => {
+  const artist = currentArtistName || input.value.trim();
+  if (!artist) return;
+  // Clear cache for this artist
+  localStorage.removeItem(cacheKey(artist));
+  input.value = artist;
+  form.dispatchEvent(new Event('submit'));
+});
+
+/* ── THEME MAP ── */
+const ARTIST_THEMES = {
+  'sabrina carpenter': { cls: 'theme-sabrina-carpenter', deco: ['🎀','✨','💖','🎀'], script: 'xoxo',         emoji: '🎀', floats: ['🎀','💋','💖','✨','🩷','♡','🎀','💗'],   collageBg: 'linear-gradient(170deg, #fff5f8 0%, #ffe8ef 40%, #fdd6e4 100%)' },
+  'billie eilish':     { cls: 'theme-billie-eilish',     deco: ['🖤','🕷️','💚','🖤'], script: 'blohsh',      emoji: '💚', floats: ['🕷️','💚','🖤','🕸️','💀','🐍','🖤','💚'], collageBg: 'linear-gradient(170deg, #f1f9ef 0%, #dcefd6 40%, #c8e6be 100%)' },
+  'taylor swift':      { cls: 'theme-taylor-swift',      deco: ['⭐','🦋','💛','⭐'], script: 'the eras',    emoji: '🦋', floats: ['⭐','🦋','✨','💛','🌟','✨','⭐','🦋'],   collageBg: 'linear-gradient(170deg, #fdf8f0 0%, #f9ecd4 40%, #f2ddb5 100%)' },
+  'olivia rodrigo':    { cls: 'theme-olivia-rodrigo',    deco: ['🔮','💜','🦋','🔮'], script: 'guts',        emoji: '🔮', floats: ['🔮','💜','🦋','💔','🔮','⚡','💜','🦋'],   collageBg: 'linear-gradient(170deg, #faf4ff 0%, #f0e0fa 40%, #e4ccf5 100%)' },
+  'reneé rapp':        { cls: 'theme-rene-rapp',         deco: ['💙','✨','🎭','💙'], script: 'snow angel',  emoji: '💙', floats: ['💙','❄️','✨','🎭','💙','⭐','❄️','✨'],   collageBg: 'linear-gradient(170deg, #f5f5ff 0%, #e4e6fa 40%, #d2d5f5 100%)' },
+  'zara larsson':      { cls: 'theme-zara-larsson',      deco: ['🌻','✨','🔥','🌻'], script: 'venus',       emoji: '🌻', floats: ['🌻','☀️','✨','🔥','💛','🌻','☀️','✨'],   collageBg: 'linear-gradient(170deg, #fffaf2 0%, #fdecd0 40%, #f8dbb0 100%)' },
+  'pinkpantheress':    { cls: 'theme-pinkpantheress',    deco: ['🩷','🎀','💗','🩷'], script: 'heaven knows',emoji: '🩷', floats: ['🩷','💗','🫧','✨','🎀','💕','🫧','🩷'],   collageBg: 'linear-gradient(170deg, #fff5fa 0%, #ffe0f0 40%, #fcc8e4 100%)' },
+  'tate mcrae':        { cls: 'theme-tate-mcrae',        deco: ['💎','🖤','💙','💎'], script: 'think later', emoji: '💎', floats: ['💎','💙','🖤','✨','💎','🌊','💙','✨'],     collageBg: 'linear-gradient(170deg, #f4f8fc 0%, #dde8f4 40%, #c4d8ec 100%)' },
+  'sza':               { cls: 'theme-sza',               deco: ['🌿','✨','💚','🌿'], script: 'SOS',         emoji: '🌿', floats: ['🌿','💚','🦋','✨','🍃','🌙','🌿','💚'],   collageBg: 'linear-gradient(170deg, #f2faf5 0%, #d8f0e2 40%, #bee6cc 100%)' },
+  'ariana grande':     { cls: 'theme-ariana-grande',      deco: ['☁️','💅','💗','☁️'], script: 'and i',       emoji: '☁️', floats: ['☁️','💗','💅','✨','☁️','🌸','💗','✨'],   collageBg: 'linear-gradient(170deg, #fef8ff 0%, #f5e0fa 40%, #eac8f5 100%)' },
+  'bts':               { cls: 'theme-bts',               deco: ['💜','⟭⟬','✨','💜'], script: 'forever',     emoji: '💜', floats: ['💜','✨','💜','⭐','💜','✨','💜','⭐'],     collageBg: 'linear-gradient(170deg, #f5f3ff 0%, #e2defa 40%, #cec8f5 100%)' },
+  'drake':             { cls: 'theme-drake',              deco: ['🦉','6️⃣','🔥','🦉'], script: 'OVO',         emoji: '🦉', floats: ['🦉','🔥','6️⃣','✨','🦉','🏀','🔥','✨'], collageBg: 'linear-gradient(170deg, #f8f4ee 0%, #ecdcc8 40%, #dfc8a8 100%)' },
+};
+const DEFAULT_THEME = { cls: '', deco: ['🎀','✨','💖','🎀'], script: 'forever', emoji: '✨', floats: ['✨','💖','🎀','⭐','✨','💫','🌟','💖'], collageBg: 'linear-gradient(170deg, #fff5f7 0%, #ffe8ef 40%, #fdd6e4 100%)' };
+
+/* ── QUICK PICK ARTISTS ── */
+const QUICK_PICKS = [
+  'Sabrina Carpenter', 'Billie Eilish', 'Taylor Swift', 'Olivia Rodrigo',
+  'Reneé Rapp', 'Zara Larsson', 'PinkPantheress', 'Tate McRae',
+  'SZA', 'Ariana Grande',
+];
+
+function renderQuickPicks() {
+  const grid = document.getElementById('quickPicksGrid');
+  QUICK_PICKS.forEach(name => {
+    const theme = ARTIST_THEMES[name.toLowerCase()] || DEFAULT_THEME;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'quick-pick-btn';
+    btn.innerHTML = `<span class="qp-emoji">${theme.emoji}</span> ${name}`;
+    btn.addEventListener('click', () => {
+      input.value = name;
+      form.dispatchEvent(new Event('submit'));
+    });
+    grid.appendChild(btn);
+  });
+}
+renderQuickPicks();
+
+function applyTheme(artist) {
+  document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
+  const key = artist.toLowerCase().trim();
+  const theme = ARTIST_THEMES[key] || DEFAULT_THEME;
+  if (theme.cls) document.body.classList.add(theme.cls);
+
+  const decor = document.getElementById('bgDecor');
+  decor.innerHTML = '';
+  const floats = theme.floats || DEFAULT_THEME.floats;
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    s.textContent = floats[i % floats.length];
+    s.style.left = (Math.random() * 95) + '%';
+    s.style.animationDelay = (Math.random() * 12) + 's';
+    s.style.animationDuration = (10 + Math.random() * 8) + 's';
+    s.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+    decor.appendChild(s);
+  }
+
+  return theme;
+}
+
+/* ── HISTORY ── */
+const HISTORY_KEY = 'collage_artist_history';
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+  catch { return []; }
+}
+function saveHistory(list) { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); }
+
+function addToHistory(name, thumbUrl) {
+  let list = loadHistory();
+  list = list.filter(h => h.name.toLowerCase() !== name.toLowerCase());
+  list.unshift({ name, thumb: thumbUrl });
+  if (list.length > 20) list = list.slice(0, 20);
+  saveHistory(list);
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  historyList.innerHTML = '';
+  list.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    if (input.value.trim().toLowerCase() === h.name.toLowerCase()) el.classList.add('active');
+    el.innerHTML = `
+      <img class="history-thumb" src="${h.thumb}" alt="" onerror="this.style.visibility='hidden'">
+      <span class="history-name">${h.name}</span>`;
+    el.addEventListener('click', () => {
+      input.value = h.name;
+      form.dispatchEvent(new Event('submit'));
+    });
+    historyList.appendChild(el);
+  });
+}
+
+clearBtn.addEventListener('click', () => { localStorage.removeItem(HISTORY_KEY); renderHistory(); });
+renderHistory();
+
+/* ── SEARCH ── */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const rawInput = input.value.trim();
+  if (!rawInput) return;
+
+  hide(errorMsg); hide(toolbar); hide(wrapper); hide(discography); hide(candidatesPanel);
+  show(loader);
+  document.body.classList.remove('has-results');
+  collageEl.innerHTML = '';
+  setLoaderMsg('Searching for artist...');
+
+  try {
+    const { artistName, albumFilter, artistId } = await smartParse(rawInput);
+    if (!artistId) {
+      console.error('smartParse: no artist ID found for', rawInput);
+      hide(loader); show(errorMsg); return;
+    }
+    console.log('Resolved:', artistName, 'ID:', artistId, 'Album:', albumFilter);
+
+    const theme = applyTheme(artistName);
+
+    let allImages, albums;
+    const cached = loadCache(artistName);
+    if (cached && !albumFilter) {
+      setLoaderMsg('Loading from cache...');
+      allImages = cached.images;
+      albums = cached.albums;
+      console.log('Cache hit:', allImages.length, 'images');
+    } else {
+      setLoaderMsg('Gathering images from multiple sources...');
+
+      // Core fetch (iTunes + Wikimedia) — this MUST succeed
+      const mainResult = await fetchAllImages(artistName, artistId);
+      allImages = mainResult.images;
+      albums = mainResult.albums;
+      console.log('iTunes+Wiki:', allImages.length, 'images,', albums.length, 'albums');
+
+      // Discogs — optional, don't let it break the flow
+      try {
+        const discogsPhotos = await fetchDiscogsImages(artistName);
+        if (discogsPhotos.length > 0) {
+          allImages = [...allImages, ...discogsPhotos];
+          console.log('Discogs added:', discogsPhotos.length, 'photos');
+        }
+      } catch (e) { console.warn('Discogs fetch failed (non-fatal):', e.message); }
+
+      allImages = dedup(allImages);
+
+      // Face detection — optional, don't let it break the flow
+      try {
+        setLoaderMsg('Analyzing image quality...');
+        await loadFaceDetector();
+        const photoCandidates = allImages
+          .filter(i => i.type === 'photo')
+          .sort((a, b) => (b.score || 0) - (a.score || 0))
+          .slice(0, 8);
+
+        for (const img of photoCandidates) {
+          const penalty = await checkHeadCrop(img.art, true);
+          img.score = Math.max(0, (img.score || 0) + penalty);
+          if (penalty < -10) img.tags = [...(img.tags || []), 'bad-crop'];
+        }
+        console.log('Face detection done on', photoCandidates.length, 'photos');
+      } catch (e) { console.warn('Face detection failed (non-fatal):', e.message); }
+
+      // Quality signals from DB — optional
+      try {
+        const signals = await getQualitySignals(artistName);
+        allImages.forEach(img => {
+          if (signals.rejected.includes(img.art)) img.score = 0;
+          if (signals.preferred.includes(img.art)) img.score = (img.score || 0) + 20;
+        });
+      } catch (e) { console.warn('Quality DB failed (non-fatal):', e.message); }
+
+      // Cache + DB save — optional
+      try { saveCache(artistName, artistId, allImages, albums); } catch (e) { console.warn('Cache save failed:', e.message); }
+      try { saveImagesToDB(allImages, artistName); } catch (e) {}
+    }
+
+    console.log('Total candidate pool:', allImages.length);
+    if (!allImages.length) { hide(loader); show(errorMsg); return; }
+
+    // Compose the best collage
+    setLoaderMsg('Composing your collage...');
+    const selected = composeCollage(allImages, albumFilter, 18);
+    console.log('Selected for collage:', selected.length);
+    if (!selected.length) { hide(loader); show(errorMsg); return; }
+
+    // Store state for candidate pool & swapping
+    currentCandidatePool = allImages;
+    currentSelectedImages = selected;
+    currentArtistName = artistName;
+    currentTheme = theme;
+    currentAlbumFilter = albumFilter;
+
+    addToHistory(artistName + (albumFilter ? ' — ' + albumFilter : ''), selected[0].art);
+    renderHistory();
+    renderDiscography(albums, albumFilter, artistName);
+    buildCollage(
+      albumFilter ? `${artistName}: ${albumFilter}` : artistName,
+      selected, theme
+    );
+    renderCandidatePool();
+    hide(loader);
+    show(toolbar);
+    show(discography);
+    show(candidatesPanel);
+    show(wrapper);
+    document.body.classList.add('has-results');
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    console.error(err);
+    hide(loader);
+    show(errorMsg);
+  }
+});
+
+function setLoaderMsg(msg) {
+  const p = loader.querySelector('p');
+  if (p) p.textContent = msg;
+}
+
+/*
+  ── SMART PARSE ──
+  "Ariana Grande Positions" → artist: Ariana Grande, album: Positions
+  "SZA SOS" → artist: SZA, album: SOS
+  Strategy: try progressively shorter prefixes. Match strictly:
+  the API artist name must closely equal the candidate (not just substring).
+*/
+async function smartParse(rawInput) {
+  const words = rawInput.split(/\s+/);
+
+  for (let split = words.length; split >= 1; split--) {
+    const candidateArtist = words.slice(0, split).join(' ');
+    const candidateAlbum = words.slice(split).join(' ') || null;
+    const cLower = candidateArtist.toLowerCase();
+
+    const resp = await fetch(
+      `https://itunes.apple.com/search?term=${encodeURIComponent(candidateArtist)}&entity=musicArtist&limit=10&country=US`
+    );
+    const data = await resp.json();
+
+    // STRICT match: API artist name must closely equal the candidate
+    const match = data.results.find(a => {
+      const n = a.artistName.toLowerCase();
+      // Exact match
+      if (n === cLower) return true;
+      // API name contains candidate AND they're similar length (not "candidateXYZ")
+      if (n.includes(cLower) && n.length <= cLower.length + 5) return true;
+      // Candidate contains API name AND similar length
+      if (cLower.includes(n) && cLower.length <= n.length + 3) return true;
+      return false;
+    });
+
+    if (match) {
+      return { artistName: match.artistName, albumFilter: candidateAlbum, artistId: match.artistId };
+    }
+  }
+
+  return { artistName: rawInput, albumFilter: null, artistId: null };
+}
+
+/* ── DISCOGRAPHY STRIP ── */
+function renderDiscography(albums, activeAlbum, artistName) {
+  discoScroll.innerHTML = '';
+  albums.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'disco-album';
+    const isActive = activeAlbum && a.name.toLowerCase().includes(activeAlbum.toLowerCase());
+    el.innerHTML = `
+      <img src="${a.art}" alt="${a.name}" loading="lazy"${isActive ? ' style="border-color:var(--accent)"' : ''}>
+      <div class="disco-title"${isActive ? ' style="color:var(--accent)"' : ''}>${a.name}</div>
+      <div class="disco-year">${a.year}</div>`;
+    el.addEventListener('click', () => {
+      input.value = artistName + ' ' + a.name;
+      form.dispatchEvent(new Event('submit'));
+    });
+    discoScroll.appendChild(el);
+  });
+}
+
+/* ══════════════════════════════════════════
+   FETCH FROM MULTIPLE SOURCES
+   Returns the FULL candidate pool (scored & tagged).
+   Composition happens later in composeCollage().
+   ══════════════════════════════════════════ */
+async function fetchAllImages(artistName, artistId) {
+  const [itunesResult, wikiPhotos] = await Promise.all([
+    fetchItunes(artistName, artistId),
+    fetchWikiImages(artistName),
+  ]);
+
+  // Combine all into one scored pool
+  const allImages = [
+    ...itunesResult.albumImages,
+    ...itunesResult.videoImages,
+    ...itunesResult.singleImages,
+    ...wikiPhotos,
+  ];
+
+  // Global dedup
+  const unique = dedup(allImages);
+
+  return { images: unique, albums: itunesResult.albumImages };
+}
+
+/* ── iTunes fetch (scored & tagged) ── */
+async function fetchItunes(artistName, artistId) {
+  setLoaderMsg('Fetching from Apple Music...');
+  const [albumResp, videoResp, songResp] = await Promise.all([
+    fetch(`https://itunes.apple.com/lookup?id=${artistId}&entity=album&limit=50&country=US`),
+    fetch(`https://itunes.apple.com/lookup?id=${artistId}&entity=musicVideo&limit=60&country=US`),
+    fetch(`https://itunes.apple.com/lookup?id=${artistId}&entity=song&limit=80&country=US`),
+  ]);
+  const [albumData, videoData, songData] = await Promise.all([
+    albumResp.json(), videoResp.json(), songResp.json(),
+  ]);
+
+  const artistLower = artistName.toLowerCase();
+
+  // Albums
+  const albumImages = [];
+  const seenAlbum = new Set();
+  const allAlbums = albumData.results
+    .filter(r => r.wrapperType === 'collection' && r.collectionType === 'Album')
+    .filter(r => isExactArtist(r.artistName, artistLower))
+    .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+
+  for (const r of allAlbums) {
+    const key = r.collectionName.replace(/\s*\(.*?\)\s*/g, '').toLowerCase();
+    if (seenAlbum.has(key)) continue;
+    seenAlbum.add(key);
+    const img = {
+      art: r.artworkUrl100.replace('100x100', '600x600'),
+      name: r.collectionName, artistName: r.artistName,
+      label: r.collectionName + ' (' + new Date(r.releaseDate).getFullYear() + ')',
+      type: 'album', year: new Date(r.releaseDate).getFullYear(),
+      date: new Date(r.releaseDate), collectionId: r.collectionId,
+      dims: [600, 600],
+    };
+    scoreAndTag(img, 'itunes-album');
+    albumImages.push(img);
+  }
+
+  // Music videos — strict solo
+  const videoImages = [];
+  const seenVideo = new Set();
+  const allVideos = videoData.results
+    .filter(v => v.wrapperType === 'track' && v.kind === 'music-video' && v.artworkUrl100)
+    .filter(v => isExactArtist(v.artistName, artistLower))
+    .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+
+  for (const v of allVideos) {
+    const key = v.trackName?.toLowerCase();
+    if (key && seenVideo.has(key)) continue;
+    if (key) seenVideo.add(key);
+    const img = {
+      art: v.artworkUrl100.replace('100x100', '600x600'),
+      label: v.trackName, type: 'video',
+      year: new Date(v.releaseDate).getFullYear(),
+      date: new Date(v.releaseDate), dims: [600, 600],
+    };
+    scoreAndTag(img, 'itunes-video');
+    videoImages.push(img);
+  }
+
+  // Singles — unique artwork only
+  const singleImages = [];
+  const seenSingle = new Set();
+  const allSongs = songData.results
+    .filter(s => s.wrapperType === 'track' && s.kind === 'song' && s.artworkUrl100)
+    .filter(s => isExactArtist(s.artistName, artistLower))
+    .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+
+  for (const s of allSongs) {
+    const artKey = s.artworkUrl100;
+    if (seenSingle.has(artKey)) continue;
+    const artHiRes = artKey.replace('100x100', '600x600');
+    if (albumImages.some(a => a.art === artHiRes)) continue;
+    seenSingle.add(artKey);
+    const img = {
+      art: artHiRes, label: s.trackName + ' (Single)',
+      type: 'single', year: new Date(s.releaseDate).getFullYear(),
+      date: new Date(s.releaseDate), dims: [600, 600],
+    };
+    scoreAndTag(img, 'itunes-single');
+    singleImages.push(img);
+  }
+
+  return { albumImages, videoImages, singleImages };
+}
+
+/* ── Wikipedia + Wikimedia Commons fetch ── */
+async function fetchWikiImages(artistName) {
+  setLoaderMsg('Searching Wikipedia & Wikimedia Commons...');
+  const photos = [];
+  const seenUrls = new Set();
+  const seenEvents = new Set();
+
+  // 1. Wikipedia main article image — usually a high-quality press photo
+  try {
+    const wikiName = artistName.replace(/\s+/g, '_');
+    const resp = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiName)}`
+    );
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.originalimage?.source) {
+        const img = {
+          art: data.originalimage.source,
+          label: artistName + ' (Press Photo)',
+          title: 'Wikipedia main press photo',
+          type: 'photo',
+          dims: [data.originalimage.width, data.originalimage.height],
+        };
+        scoreAndTag(img, 'wiki-main');
+        photos.push(img);
+        seenUrls.add(data.originalimage.source);
+      }
+    }
+  } catch (e) {}
+
+  // 2. Wikimedia Commons — TRY CATEGORY FIRST (much more accurate)
+  //    Categories like "Category:Ariana Grande" are manually curated
+  //    and contain only real photos of the artist.
+  const wikiCat = artistName.replace(/\s+/g, '_');
+  let gotCategoryResults = false;
+
+  try {
+    const catResp = await fetch(
+      `https://commons.wikimedia.org/w/api.php?action=query` +
+      `&list=categorymembers&cmtitle=Category:${encodeURIComponent(wikiCat)}` +
+      `&cmtype=file&cmnamespace=6&cmlimit=40&cmsort=timestamp&cmdir=desc` +
+      `&format=json&origin=*`
+    );
+    if (catResp.ok) {
+      const catData = await catResp.json();
+      const members = catData.query?.categorymembers || [];
+
+      if (members.length > 0) {
+        gotCategoryResults = true;
+        // Get image info for these files
+        const titles = members.map(m => m.title).join('|');
+        const infoResp = await fetch(
+          `https://commons.wikimedia.org/w/api.php?action=query` +
+          `&titles=${encodeURIComponent(titles)}` +
+          `&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=800` +
+          `&format=json&origin=*`
+        );
+        if (infoResp.ok) {
+          const infoData = await infoResp.json();
+          const pages = Object.values(infoData.query?.pages || {});
+          processWikiPages(pages, photos, seenUrls, seenEvents, artistName, 'wiki-cat');
+        }
+      }
+    }
+  } catch (e) { console.warn('Wikimedia category fetch failed:', e.message); }
+
+  // 3. Fallback: free-text search if category didn't work
+  if (!gotCategoryResults) {
+    try {
+      const resp = await fetch(
+        `https://commons.wikimedia.org/w/api.php?action=query&generator=search` +
+        `&gsrsearch=${encodeURIComponent('"' + artistName + '" photograph')}` +
+        `&gsrnamespace=6&gsrlimit=30` +
+        `&prop=imageinfo&iiprop=url|size|mime|extmetadata&iiurlwidth=800` +
+        `&format=json&origin=*`
+      );
+      if (resp.ok) {
+        const data = await resp.json();
+        const pages = Object.values(data.query?.pages || {});
+        pages.sort((a, b) => (b.pageid || 0) - (a.pageid || 0));
+        processWikiPages(pages, photos, seenUrls, seenEvents, artistName, 'wiki-search');
+      }
+    } catch (e) { console.warn('Wikimedia search failed:', e.message); }
+  }
+
+  return photos;
+}
+
+/* Process Wikimedia pages with strict quality filtering */
+function processWikiPages(pages, photos, seenUrls, seenEvents, artistName, sourceType) {
+  const artistLower = artistName.toLowerCase();
+
+  for (const page of pages) {
+    const info = page.imageinfo?.[0];
+    if (!info) continue;
+
+    // Must be JPEG or PNG
+    if (!info.mime?.startsWith('image/jpeg') && !info.mime?.startsWith('image/png')) continue;
+
+    // Minimum dimensions — must be a real photo, not a thumbnail
+    if (info.width < 500 || info.height < 400) continue;
+
+    // Aspect ratio: reject extreme crops (banners, strips, tiny crops)
+    const ratio = info.width / info.height;
+    if (ratio > 2.2 || ratio < 0.35) continue;
+
+    const title = (page.title || '').toLowerCase();
+
+    // ── STRICT CONTENT FILTER ──
+    // Skip anything that's clearly not a photo of the artist
+    const skipWords = [
+      'logo', 'icon', 'flag', 'signature', 'autograph', 'chart',
+      'poster', 'screenshot', 'fan art', 'fanart', 'drawing',
+      'illustration', 'artwork', 'cartoon', 'anime', 'comic',
+      'album cover', 'single cover', 'disc', 'vinyl', 'cd',
+      'ticket', 'setlist', 'wristband', 'merchandise', 'merch',
+      'map', 'diagram', 'graph', 'table', 'collage',
+      'wicked', 'movie poster', 'film poster', 'dvd',
+    ];
+    if (skipWords.some(w => title.includes(w))) continue;
+
+    // Check extmetadata categories if available
+    const categories = (info.extmetadata?.Categories?.value || '').toLowerCase();
+    if (categories.includes('album covers') || categories.includes('logos')) continue;
+    if (categories.includes('drawings') || categories.includes('fan art')) continue;
+    if (categories.includes('screenshots')) continue;
+
+    // ── SAME-EVENT DEDUP ──
+    // Extract event signature from filename to avoid same-shoot/event dupes
+    const cleanTitle = title
+      .replace(/file:/g, '')
+      .replace(artistLower, '')
+      .replace(/\.(jpg|jpeg|png)$/g, '')
+      .replace(/[_\-]+/g, ' ')
+      .trim();
+
+    // Extract date pattern (YYYY-MM-DD or YYYY MM DD)
+    const dateMatch = cleanTitle.match(/(\d{4}[\s\-]\d{2}[\s\-]\d{2})/);
+    // Extract event name (first meaningful words after removing numbers)
+    const eventWords = cleanTitle
+      .replace(/\d+/g, '')
+      .replace(/\b(at|in|the|of|by|from|on|during|jpg|png|file|commons)\b/g, '')
+      .trim()
+      .split(/\s+/)
+      .slice(0, 3)
+      .join(' ');
+
+    const eventKey = (dateMatch ? dateMatch[1] : '') + ' ' + eventWords;
+    if (eventKey.trim() && seenEvents.has(eventKey.trim())) continue;
+    if (eventKey.trim()) seenEvents.add(eventKey.trim());
+
+    const url = info.thumburl || info.url;
+    if (seenUrls.has(url)) continue;
+    seenUrls.add(url);
+
+    // Extract metadata for scoring
+    const ext = info.extmetadata || {};
+    const img = {
+      art: url,
+      label: artistName + ' (Photo)',
+      title: page.title || '',
+      type: 'photo',
+      dims: [info.width, info.height],
+      photographer: !!(ext.Artist?.value),
+      license: ext.LicenseShortName?.value || '',
+      hasExifDate: !!(ext.DateTimeOriginal?.value),
+      hasCategoryMatch: (ext.Categories?.value || '').toLowerCase().includes(artistName.toLowerCase()),
+      descLength: (ext.ImageDescription?.value || '').length,
+    };
+
+    // Determine source type
+    const srcType = sourceType || 'wiki-search';
+    scoreAndTag(img, srcType);
+
+    // Skip if score is too low (likely not a good photo)
+    if (img.score < 20) continue;
+
+    photos.push(img);
+  }
+
+  // Sort by score descending
+  photos.sort((a, b) => (b.score || 0) - (a.score || 0));
+}
+
+/* ── GLOBAL DEDUP ── */
+function dedup(images) {
+  const seen = new Set();
+  return images.filter(img => {
+    const key = img.art
+      .replace(/\/\d+x\d+[a-z]*\./i, '/NORM.')
+      .replace(/\?.*$/, '')
+      .replace(/\/thumb\/.*\/(\d+px-)/, '/NORM/');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/* ═══════════════════════════════════════════
+   COMPOSITION SCORER
+   Greedy selection: picks images one at a time,
+   maximizing individual score + set diversity.
+   ═══════════════════════════════════════════ */
+function composeCollage(candidatePool, albumFilter, count) {
+  let pool = [...candidatePool];
+
+  // If album filter, boost matching era
+  if (albumFilter) {
+    const f = albumFilter.toLowerCase().trim();
+    const matchedAlbum = pool.find(img =>
+      img.type === 'album' && img.name &&
+      (img.name.toLowerCase().includes(f) || f.includes(img.name.toLowerCase()))
+    );
+    if (matchedAlbum) {
+      const albumYear = matchedAlbum.year;
+      pool.forEach(img => {
+        const imgYear = img.year || 0;
+        if (Math.abs(imgYear - albumYear) <= 1) img.score = (img.score || 0) + 15;
+        if (img === matchedAlbum) img.score = (img.score || 0) + 20;
+      });
+    }
+  }
+
+  // Sort by score, take top candidates
+  pool.sort((a, b) => (b.score || 0) - (a.score || 0));
+  pool = pool.slice(0, count * 3).filter(img => (img.score || 0) >= 20);
+
+  if (pool.length === 0) return [];
+
+  // Greedy selection
+  const selected = [];
+  const typeCounts = {};
+  const yearCounts = {};
+
+  for (let slot = 0; slot < count && pool.length > 0; slot++) {
+    let bestIdx = -1, bestScore = -Infinity;
+
+    for (let i = 0; i < pool.length; i++) {
+      const cs = compositionScore(pool[i], selected, typeCounts, yearCounts, slot);
+      if (cs > bestScore) { bestScore = cs; bestIdx = i; }
+    }
+
+    if (bestIdx === -1) break;
+    const picked = pool.splice(bestIdx, 1)[0];
+    selected.push(picked);
+    typeCounts[picked.type || 'other'] = (typeCounts[picked.type || 'other'] || 0) + 1;
+    yearCounts[picked.year || 0] = (yearCounts[picked.year || 0] || 0) + 1;
+  }
+
+  return selected;
+}
+
+function compositionScore(candidate, selected, typeCounts, yearCounts, slot) {
+  const indiv = ((candidate.score || 0) / 100) * 50;
+
+  // Type diversity (0-20)
+  const tCount = typeCounts[candidate.type || 'other'] || 0;
+  const typDiv = tCount === 0 ? 20 : tCount === 1 ? 12 : tCount === 2 ? 5 : 0;
+
+  // Year spread (0-15)
+  const y = candidate.year || 0;
+  let minDist = 99;
+  for (const s of selected) {
+    if (s.year && y) minDist = Math.min(minDist, Math.abs(y - s.year));
+  }
+  if (selected.length === 0) minDist = 5;
+  const yearSpread = Math.min(minDist * 4, 15);
+
+  // Adjacency penalty
+  let adj = 0;
+  if (selected.length > 0) {
+    const prev = selected[selected.length - 1];
+    if (prev.type === candidate.type) adj -= 10;
+    if (prev.year && candidate.year && prev.year === candidate.year) adj -= 5;
+  }
+
+  // Slot bonus: big slots prefer high-scored + photos
+  let slotB = 0;
+  if (slot <= 1) slotB = ((candidate.score || 0) / 100) * 10;
+  if (slot <= 2 && candidate.type === 'photo') slotB += 5;
+
+  return indiv + typDiv + yearSpread + adj + slotB;
+}
+
+/* STRICT artist name check — rejects all collabs. */
+function isExactArtist(resultArtist, searchLower) {
+  if (!resultArtist) return false;
+  const rLower = resultArtist.toLowerCase().trim();
+  if (rLower === searchLower) return true;
+  if (rLower.includes(' & ') || rLower.includes(' x ') || rLower.includes(', ')) return false;
+  if (/\bfeat\.?\s/i.test(rLower) || /\bwith\b/i.test(rLower) || /\bft\.?\s/i.test(rLower)) return false;
+  return rLower.includes(searchLower) || searchLower.includes(rLower);
+}
+
+/* ── LAYOUT ── */
+const LAYOUT_SEQUENCE = [
+  'sz-hero',  'sz-large', 'sz-tiny',
+  'sz-small', 'sz-small', 'sz-medium',
+  'sz-wide',  'sz-medium','sz-tiny', 'sz-tiny',
+  'sz-large', 'sz-small', 'sz-small','sz-tiny',
+  'sz-medium','sz-medium','sz-medium',
+  'sz-tiny','sz-tiny','sz-small','sz-large',
+  'sz-wide','sz-medium','sz-small','sz-small',
+  'sz-tiny','sz-tiny','sz-tiny','sz-tiny','sz-tiny','sz-tiny',
+];
+
+function buildCollage(artistName, images, theme) {
+  collageEl.innerHTML = '';
+
+  // Set themed collage background
+  collageEl.style.background = theme.collageBg || DEFAULT_THEME.collageBg;
+
+  // Corner decorations
+  const decos = theme.deco || ['🎀','✨','💖','🎀'];
+  ['tl','tr','bl','br'].forEach((pos, i) => {
+    const d = document.createElement('div');
+    d.className = `deco-corner deco-${pos}`;
+    d.textContent = decos[i];
+    collageEl.appendChild(d);
+  });
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'collage-header';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'collage-artist-name';
+  nameEl.textContent = artistName;
+  const len = artistName.length;
+  if (len <= 6)       nameEl.style.fontSize = '60pt';
+  else if (len <= 10) nameEl.style.fontSize = '48pt';
+  else if (len <= 16) nameEl.style.fontSize = '38pt';
+  else if (len <= 24) nameEl.style.fontSize = '28pt';
+  else                nameEl.style.fontSize = '22pt';
+
+  const script = document.createElement('div');
+  script.className = 'collage-script';
+  script.textContent = theme.script || '';
+
+  const subtitle = document.createElement('div');
+  subtitle.className = 'collage-subtitle';
+  const years = images.filter(i => i.year).map(i => i.year);
+  subtitle.textContent = years.length
+    ? `${Math.min(...years)}–${Math.max(...years)}  ·  ${images.length} images`
+    : `${images.length} images`;
+
+  header.appendChild(nameEl);
+  header.appendChild(script);
+  header.appendChild(subtitle);
+  collageEl.appendChild(header);
+
+  // Divider
+  const div = document.createElement('div');
+  div.className = 'collage-divider';
+  collageEl.appendChild(div);
+
+  // Mosaic — cap at 18 tiles for one page
+  const maxTiles = 18;
+  const tiles = images.slice(0, maxTiles);
+
+  const mosaic = document.createElement('div');
+  mosaic.className = 'collage-mosaic';
+
+  let totalRowSpans = 0;
+  const assigned = [];
+  for (let i = 0; i < tiles.length; i++) {
+    const sz = LAYOUT_SEQUENCE[i % LAYOUT_SEQUENCE.length];
+    assigned.push(sz);
+    totalRowSpans += (sz === 'sz-hero' || sz === 'sz-large') ? 2 : 1;
+  }
+  const estRows = Math.ceil(totalRowSpans / 3);
+  mosaic.style.gridTemplateRows = `repeat(${Math.min(estRows, 6)}, 1fr)`;
+
+  tiles.forEach((img, i) => {
+    const tile = document.createElement('div');
+    tile.className = `mosaic-item ${assigned[i]}`;
+    tile.style.animationDelay = `${i * 0.04}s`;
+
+    const imgEl = document.createElement('img');
+    imgEl.src = img.art;
+    imgEl.alt = img.label || '';
+    imgEl.loading = i < 6 ? 'eager' : 'lazy';
+
+    const label = document.createElement('div');
+    label.className = 'tile-label';
+    label.textContent = img.label || '';
+
+    // Remove button — hover to see, click to remove
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'tile-remove';
+    removeBtn.textContent = '✕';
+    removeBtn.title = 'Remove this image';
+    removeBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      // Record rejection
+      recordSignal(img.art, currentArtistName, 'reject');
+      // Find the best replacement from the pool
+      const selectedUrls = new Set(currentSelectedImages.map(x => x.art));
+      const replacement = currentCandidatePool
+        .filter(x => !selectedUrls.has(x.art) && (x.score || 0) > 15)
+        .sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+
+      // Replace in the selected array
+      const idx = currentSelectedImages.findIndex(x => x.art === img.art);
+      if (idx !== -1 && replacement) {
+        currentSelectedImages[idx] = replacement;
+        recordSignal(replacement.art, currentArtistName, 'swap_in');
+      } else if (idx !== -1) {
+        currentSelectedImages.splice(idx, 1);
+      }
+
+      // Animate out, then rebuild
+      tile.style.transition = 'opacity 0.3s, transform 0.3s';
+      tile.style.opacity = '0';
+      tile.style.transform = 'scale(0.8)';
+      setTimeout(() => {
+        buildCollage(
+          currentAlbumFilter ? `${currentArtistName}: ${currentAlbumFilter}` : currentArtistName,
+          currentSelectedImages, currentTheme
+        );
+        renderCandidatePool();
+      }, 300);
+    });
+
+    tile.appendChild(imgEl);
+    tile.appendChild(label);
+    tile.appendChild(removeBtn);
+    mosaic.appendChild(tile);
+  });
+
+  collageEl.appendChild(mosaic);
+
+  // Footer
+  const footer = document.createElement('div');
+  footer.className = 'collage-footer';
+  footer.innerHTML = `<span>Collage.</span><span>${artistName.toUpperCase()}</span>`;
+  collageEl.appendChild(footer);
+}
+
+function show(el) { el.classList.add('active'); }
+function hide(el) { el.classList.remove('active'); }
+</script>
+</body>
+</html>

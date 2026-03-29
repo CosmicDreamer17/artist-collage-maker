@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head><title>Browser E2E Test</title></head>
+<body>
+<h2>Browser E2E Test</h2>
+<pre id="log"></pre>
+<script>
+const log = document.getElementById('log');
+function print(msg) { log.textContent += msg + '\n'; console.log(msg); }
+
+async function runTests() {
+  print('Starting browser tests...\n');
+
+  // Test 1: smartParse works
+  try {
+    print('Test 1: iTunes artist search...');
+    const resp = await fetch('https://itunes.apple.com/search?term=Sabrina+Carpenter&entity=musicArtist&limit=10&country=US');
+    const data = await resp.json();
+    const match = data.results.find(a => a.artistName === 'Sabrina Carpenter');
+    if (!match) throw new Error('Artist not found');
+    print('  PASS: Found ' + match.artistName + ' (ID: ' + match.artistId + ')');
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  // Test 2: iTunes lookup returns albums
+  try {
+    print('\nTest 2: iTunes album lookup...');
+    const resp = await fetch('https://itunes.apple.com/lookup?id=390647681&entity=album&limit=5&country=US');
+    const data = await resp.json();
+    const albums = data.results.filter(r => r.wrapperType === 'collection');
+    if (albums.length === 0) throw new Error('No albums');
+    print('  PASS: ' + albums.length + ' albums');
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  // Test 3: Wikipedia image
+  try {
+    print('\nTest 3: Wikipedia image...');
+    const resp = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/Sabrina_Carpenter');
+    const data = await resp.json();
+    if (!data.originalimage?.source) throw new Error('No image');
+    print('  PASS: Got image');
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  // Test 4: Wikimedia Commons (browser with origin=*)
+  try {
+    print('\nTest 4: Wikimedia Commons category...');
+    const resp = await fetch(
+      'https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers' +
+      '&cmtitle=Category:Sabrina_Carpenter&cmtype=file&cmnamespace=6&cmlimit=5&format=json&origin=*'
+    );
+    const data = await resp.json();
+    const members = data.query?.categorymembers || [];
+    print('  ' + (members.length > 0 ? 'PASS' : 'WARN') + ': ' + members.length + ' members');
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  // Test 5: Server quality API
+  try {
+    print('\nTest 5: Server quality API...');
+    const resp = await fetch('/api/quality/test');
+    if (!resp.ok) throw new Error('Status ' + resp.status);
+    const data = await resp.json();
+    print('  PASS: DB responding');
+  } catch (e) { print('  FAIL: ' + e.message + ' (server might not be running)'); }
+
+  // Test 6: face-api.js loaded?
+  try {
+    print('\nTest 6: face-api.js...');
+    // Give it a moment to async load
+    await new Promise(r => setTimeout(r, 2000));
+    if (typeof faceapi !== 'undefined') {
+      print('  PASS: faceapi loaded');
+    } else {
+      print('  WARN: faceapi not loaded (face detection will be skipped)');
+    }
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  // Test 7: Full search flow
+  try {
+    print('\nTest 7: Full search (Sabrina Carpenter)...');
+    const t0 = Date.now();
+
+    // Step 1: resolve artist
+    const searchResp = await fetch('https://itunes.apple.com/search?term=Sabrina+Carpenter&entity=musicArtist&limit=10&country=US');
+    const searchData = await searchResp.json();
+    const artist = searchData.results.find(a => a.artistName === 'Sabrina Carpenter');
+    if (!artist) throw new Error('Artist not found');
+
+    // Step 2: fetch content
+    const [albumResp, videoResp] = await Promise.all([
+      fetch('https://itunes.apple.com/lookup?id=' + artist.artistId + '&entity=album&limit=10&country=US'),
+      fetch('https://itunes.apple.com/lookup?id=' + artist.artistId + '&entity=musicVideo&limit=10&country=US'),
+    ]);
+    const [albumData, videoData] = await Promise.all([albumResp.json(), videoResp.json()]);
+
+    const albums = albumData.results.filter(r => r.wrapperType === 'collection');
+    const videos = videoData.results.filter(r => r.kind === 'music-video');
+    const total = albums.length + videos.length;
+
+    if (total === 0) throw new Error('No content');
+    print('  PASS: ' + total + ' images in ' + (Date.now() - t0) + 'ms');
+  } catch (e) { print('  FAIL: ' + e.message); }
+
+  print('\n--- Tests complete ---');
+}
+
+runTests();
+</script>
+</body>
+</html>

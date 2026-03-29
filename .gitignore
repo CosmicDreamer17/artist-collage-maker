@@ -1,0 +1,6 @@
+node_modules/
+quality.db
+quality.db-shm
+quality.db-wal
+.DS_Store
+*.log

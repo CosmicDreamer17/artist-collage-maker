@@ -1,0 +1,5 @@
+legacy-prototype/** linguist-vendored
+*.html linguist-documentation
+*.js linguist-documentation
+*.mjs linguist-documentation
+*.cjs linguist-documentation

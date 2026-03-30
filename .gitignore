@@ -1,6 +1,12 @@
 node_modules/
+.pnpm-store/
+.turbo/
+.next/
+*.tsbuildinfo
 quality.db
 quality.db-shm
 quality.db-wal
+.env
 .DS_Store
 *.log
+Screenshot *.png

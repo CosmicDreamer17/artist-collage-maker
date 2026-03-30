@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@next/schema.json",
+  "ignore": ["legacy-prototype/**", "apps/web/.next/**"],
+  "workspaces": {
+    "packages/*": {},
+    "apps/api": {
+      "entry": ["src/vercel.ts"]
+    },
+    "apps/web": {}
+  }
+}

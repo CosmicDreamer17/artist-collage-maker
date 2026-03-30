@@ -20,27 +20,31 @@ export function CandidatesPanel({
   return (
     <div className={`candidates-panel ${candidates.length > 0 ? 'active' : ''}`}>
       <div className="candidates-label">
-        {hasSwapTarget ? 'Pick a replacement' : 'Choose a picture to change'}
+        {hasSwapTarget ? 'Replacement tray' : 'Replacement tray'}
         <span>{candidates.length}</span>
       </div>
       <div className={`candidates-helper ${hasSwapTarget ? 'active' : ''}`}>
         {hasSwapTarget
-          ? `Replacing: ${selectedTargetLabel ?? 'selected image'}`
-          : 'Tap a collage picture first, then tap one of these replacements.'}
+          ? `Editing ${selectedTargetLabel ?? 'selected image'}. Drag it on the poster to reframe, or pick a replacement here.`
+          : 'Tap a picture on the poster first. Then drag it to reframe or swap in one of these options.'}
       </div>
       <div className="candidates-grid">
         {candidates.map((image, index) => (
-          <div key={`${image.art}-${index}`} className="candidate-item">
+          <button
+            key={`${image.art}-${index}`}
+            type="button"
+            className="candidate-item"
+            onClick={() => onSwapCandidate(image)}
+            title={`Score: ${image.score ?? 0} | ${image.tags?.join(', ') ?? image.type ?? 'image'}`}
+          >
             <img
               className="candidate-thumb"
               src={renderImageUrl(image)}
               alt={image.label}
               loading="lazy"
-              title={`Score: ${image.score ?? 0} | ${image.tags?.join(', ') ?? image.type ?? 'image'}`}
-              onClick={() => onSwapCandidate(image)}
             />
             <div className="candidate-score">{image.score}</div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

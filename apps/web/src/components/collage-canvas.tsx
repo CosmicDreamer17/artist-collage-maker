@@ -1,7 +1,8 @@
 'use client';
 
 import type { ImageCandidate } from '@starter/domain';
-import type { CSSProperties } from 'react';
+import { useRef } from 'react';
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { LAYOUT_SEQUENCE, type ArtistTheme } from '../lib/constants.js';
 
 interface CollageCanvasProps {
@@ -12,6 +13,7 @@ interface CollageCanvasProps {
   selectedTargetArt: string | null;
   renderImageUrl: (image: Pick<ImageCandidate, 'art' | 'src'>) => string;
   onSelect: (image: ImageCandidate) => void;
+  onAdjustTilePosition: (image: ImageCandidate, focalPoint: [number, number]) => void;
   onRemove: (image: ImageCandidate) => void;
 }
 
@@ -23,23 +25,84 @@ export function CollageCanvas({
   selectedTargetArt,
   renderImageUrl,
   onSelect,
+  onAdjustTilePosition,
   onRemove,
 }: CollageCanvasProps) {
-  const getImageStyle = (image: ImageCandidate): CSSProperties => {
+  const dragStateRef = useRef<{
+    art: string;
+    pointerId: number;
+    startX: number;
+    startY: number;
+    origin: [number, number];
+  } | null>(null);
+  const skipClickArtRef = useRef<string | null>(null);
+
+  const getDefaultFocalPoint = (image: ImageCandidate): [number, number] => {
     if (image.focalPoint) {
-      return { objectPosition: `${image.focalPoint[0]}% ${image.focalPoint[1]}%` };
+      return image.focalPoint;
     }
 
     const tags = new Set(image.tags ?? []);
     if (image.type === 'photo' && (tags.has('portrait-ratio') || tags.has('tall'))) {
-      return { objectPosition: '50% 22%' };
+      return [50, 22];
     }
 
     if (image.type === 'photo') {
-      return { objectPosition: '50% 30%' };
+      return [50, 30];
     }
 
-    return { objectPosition: '50% 50%' };
+    return [50, 50];
+  };
+
+  const getImageStyle = (image: ImageCandidate): CSSProperties => {
+    const [x, y] = getDefaultFocalPoint(image);
+    return { objectPosition: `${x}% ${y}%` };
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>, image: ImageCandidate): void => {
+    if (selectedTargetArt !== image.art) return;
+
+    dragStateRef.current = {
+      art: image.art,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      origin: getDefaultFocalPoint(image),
+    };
+
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>, image: ImageCandidate): void => {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.art !== image.art || dragState.pointerId !== event.pointerId) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const deltaX = ((event.clientX - dragState.startX) / rect.width) * 100;
+    const deltaY = ((event.clientY - dragState.startY) / rect.height) * 100;
+    if (Math.abs(deltaX) < 0.5 && Math.abs(deltaY) < 0.5) return;
+
+    skipClickArtRef.current = image.art;
+    onAdjustTilePosition(image, [dragState.origin[0] - deltaX, dragState.origin[1] - deltaY]);
+  };
+
+  const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>): void => {
+    if (dragStateRef.current?.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragStateRef.current = null;
+  };
+
+  const handleTileClick = (image: ImageCandidate): void => {
+    if (skipClickArtRef.current === image.art) {
+      skipClickArtRef.current = null;
+      return;
+    }
+
+    onSelect(image);
   };
 
   return (
@@ -74,14 +137,18 @@ export function CollageCanvas({
           {images.map((image, index) => (
             <div
               key={image.art}
-              className={`mosaic-item ${LAYOUT_SEQUENCE[index % LAYOUT_SEQUENCE.length]} ${selectedTargetArt === image.art ? 'selected-target' : ''}`}
+              className={`mosaic-item ${LAYOUT_SEQUENCE[index % LAYOUT_SEQUENCE.length]} ${selectedTargetArt === image.art ? 'selected-target draggable-target' : ''}`}
               style={{ animationDelay: `${index * 0.04}s` }}
-              onClick={() => onSelect(image)}
-              title={selectedTargetArt === image.art ? 'Tap again to stop replacing this image' : 'Tap to choose this image for replacement'}
+              onClick={() => handleTileClick(image)}
+              onPointerDown={(event) => handlePointerDown(event, image)}
+              onPointerMove={(event) => handlePointerMove(event, image)}
+              onPointerUp={handlePointerEnd}
+              onPointerCancel={handlePointerEnd}
+              title={selectedTargetArt === image.art ? 'Drag to reframe, or tap again to stop editing this image' : 'Tap to edit this image'}
             >
               <img src={renderImageUrl(image)} alt={image.label} loading={index < 6 ? 'eager' : 'lazy'} style={getImageStyle(image)} />
               <div className="tile-label">{image.label}</div>
-              {selectedTargetArt === image.art ? <div className="tile-target-badge">Replacing</div> : null}
+              {selectedTargetArt === image.art ? <div className="tile-target-badge">Editing</div> : null}
               <button className="tile-remove" title="Remove this image" onClick={(event) => {
                 event.stopPropagation();
                 onRemove(image);

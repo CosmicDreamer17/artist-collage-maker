@@ -115,6 +115,28 @@ describe('ResolveArtistQueryUseCase', () => {
       albumFilter: 'Indigo Girls Live With the University of Colorado Symphony Orchestra',
     });
   });
+
+  it('keeps exact multi-word artists intact when a shorter split also returns results', async () => {
+    const gateway: ArtistSearchGateway = {
+      async searchArtists(term: string) {
+        if (term === 'Billie Eilish') {
+          return [{ artistName: 'Billie Eilish', artistId: 12 }];
+        }
+        if (term === 'Billie') {
+          return [{ artistName: 'Billie', artistId: 13 }];
+        }
+        return [];
+      },
+    };
+
+    const result = await new ResolveArtistQueryUseCase(gateway).execute('Billie Eilish');
+
+    expect(result).toEqual({
+      artistName: 'Billie Eilish',
+      artistId: 12,
+      albumFilter: null,
+    });
+  });
 });
 
 describe('BuildCollageUseCase', () => {

@@ -1,3 +1,5 @@
+import type { CollageBuildResult } from '@starter/domain';
+
 export interface ArtistTheme {
   cls: string;
   deco: string[];
@@ -7,14 +9,23 @@ export interface ArtistTheme {
   collageBg: string;
 }
 
-export interface HistoryItem {
-  name: string;
+export type SavedCollageMode = 'autosave' | 'copy';
+
+export interface SavedCollageRecord {
+  id: string;
+  title: string;
+  query: string;
   thumb: string;
-  query?: string;
+  createdAt: string;
+  updatedAt: string;
+  mode: SavedCollageMode;
+  result: CollageBuildResult;
 }
 
 export const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
-export const HISTORY_KEY = 'collage_artist_history';
+export const SAVED_COLLAGES_KEY = 'collage_saved_collages';
+export const ACTIVE_COLLAGE_KEY = 'collage_active_collage_id';
+export const MAX_SAVED_COLLAGES = 15;
 
 export const LAYOUT_SEQUENCE = [
   'sz-hero', 'sz-large', 'sz-tiny',

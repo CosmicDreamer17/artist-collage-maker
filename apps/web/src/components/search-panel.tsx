@@ -24,7 +24,7 @@ export function SearchPanel({
       <div className="brand">
         <div className="brand-deco">🎀</div>
         <h1>Artist <em>Collage</em></h1>
-        <p>Search any artist and get a printable poster</p>
+        <p>Search any artist, build a printable poster, and keep editing without losing your work.</p>
       </div>
       <form className="search-form" onSubmit={onSubmit}>
         <input

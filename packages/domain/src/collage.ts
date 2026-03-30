@@ -186,7 +186,8 @@ export function scoreArtistResolutionCandidate(
   score -= Math.max(0, candidateLower.length - resultLower.length);
 
   if (albumFilter) {
-    score += Math.min(30, normalizeInput(albumFilter).length);
+    const albumWordCount = normalizeInput(albumFilter).split(/\s+/).length;
+    score -= Math.min(24, albumWordCount * 2);
   }
 
   return score;

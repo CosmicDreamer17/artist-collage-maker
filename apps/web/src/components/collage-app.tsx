@@ -32,10 +32,11 @@ export function CollageApp() {
 
       <div className="app-layout">
         <HistorySidebar
-          artistInput={controller.artistInput}
-          history={controller.history}
-          onHistoryClick={controller.handleHistoryClick}
-          onClearHistory={controller.handleClearHistory}
+          activeCollageId={controller.activeCollageId}
+          savedCollages={controller.savedCollages}
+          renderImageUrl={controller.renderImageUrl}
+          onSavedCollageClick={controller.handleSavedCollageClick}
+          onClearHistory={controller.handleClearSavedCollages}
         />
 
         <main className="main-content">
@@ -58,37 +59,61 @@ export function CollageApp() {
             <p>Try a different artist name or check spelling.</p>
           </div>
 
-          <div className={`toolbar ${controller.hasResults ? 'active' : ''}`}>
-            <button className="primary" onClick={() => window.print()}>🖨️ Print Collage</button>
-            <button onClick={controller.handleRefresh}>🔄 Refresh</button>
-            <button
-              onClick={() => {
-                controller.artistInputRef.current?.focus();
-                controller.artistInputRef.current?.select();
-              }}
-            >
-              New Search
-            </button>
+          <div className={`workspace-shell ${controller.hasResults ? 'active' : ''}`}>
+            <div className="workspace-header">
+              <div className={`save-status ${controller.saveState}`}>
+                <div className="save-status-label">{controller.saveStatusLabel}</div>
+                {controller.saveStatusDetail ? (
+                  <p>{controller.saveStatusDetail}</p>
+                ) : null}
+              </div>
+
+              <div className={`toolbar ${controller.hasResults ? 'active' : ''}`}>
+                <button className="primary" onClick={() => window.print()}>Print Collage</button>
+                <button onClick={controller.handleRefresh}>Refresh Layout</button>
+                <button onClick={controller.handleSaveCopy}>Save Copy</button>
+                <button
+                  onClick={() => {
+                    controller.artistInputRef.current?.focus();
+                    controller.artistInputRef.current?.select();
+                  }}
+                >
+                  New Search
+                </button>
+              </div>
+            </div>
+
+            <div className="editor-layout">
+              <div className="editor-main">
+                <CollageCanvas
+                  artistName={currentArtistName}
+                  subtitle={controller.collageSubtitle}
+                  theme={controller.theme}
+                  images={selectedImages}
+                  selectedTargetArt={controller.selectedSwapTargetArt}
+                  renderImageUrl={controller.renderImageUrl}
+                  onSelect={controller.handleSelectTile}
+                  onAdjustTilePosition={controller.handleAdjustTilePosition}
+                  onRemove={controller.handleRemoveTile}
+                />
+              </div>
+
+              <aside className="editor-sidebar">
+                <div className="editor-guide">
+                  <div className="editor-guide-title">Edit Your Poster</div>
+                  <p>Tap a picture on the poster, drag it until the crop feels right, then swap in a better option if you want.</p>
+                </div>
+
+                <CandidatesPanel
+                  candidates={alternateCandidates}
+                  hasSwapTarget={Boolean(controller.selectedSwapTargetArt)}
+                  selectedTargetLabel={controller.selectedSwapTargetLabel}
+                  renderImageUrl={controller.renderImageUrl}
+                  onSwapCandidate={controller.handleSwapCandidate}
+                />
+              </aside>
+            </div>
           </div>
-
-          <CandidatesPanel
-            candidates={alternateCandidates}
-            hasSwapTarget={Boolean(controller.selectedSwapTargetArt)}
-            selectedTargetLabel={controller.selectedSwapTargetLabel}
-            renderImageUrl={controller.renderImageUrl}
-            onSwapCandidate={controller.handleSwapCandidate}
-          />
-
-          <CollageCanvas
-            artistName={currentArtistName}
-            subtitle={controller.collageSubtitle}
-            theme={controller.theme}
-            images={selectedImages}
-            selectedTargetArt={controller.selectedSwapTargetArt}
-            renderImageUrl={controller.renderImageUrl}
-            onSelect={controller.handleSelectTile}
-            onRemove={controller.handleRemoveTile}
-          />
         </main>
       </div>
     </>

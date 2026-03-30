@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+
+echo "Running repository verification before push..."
+make verify

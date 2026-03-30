@@ -1,15 +1,95 @@
 import type { CollageBuildResult, ImageCandidate, QualitySignalAction } from '@starter/domain';
 import { buildAlternateCandidates, composeCollage, normalizeInput } from '@starter/domain';
-import type { HistoryItem } from './constants.js';
+import type { SavedCollageMode, SavedCollageRecord } from './constants.js';
+import { MAX_SAVED_COLLAGES } from './constants.js';
 
 export function buildCacheKey(query: string): string {
   return `acm_${normalizeInput(query).toLowerCase().replace(/\s+/g, '_')}`;
 }
 
-export function upsertHistory(history: HistoryItem[], nextItem: HistoryItem): HistoryItem[] {
-  const nextKey = (nextItem.query ?? nextItem.name).toLowerCase();
-  const filtered = history.filter((item) => (item.query ?? item.name).toLowerCase() !== nextKey);
-  return [nextItem, ...filtered].slice(0, 20);
+function getCollageTitle(result: CollageBuildResult): string {
+  return result.artist.albumFilter
+    ? `${result.artist.artistName} — ${result.artist.albumFilter}`
+    : result.artist.artistName;
+}
+
+function getCollageThumb(result: CollageBuildResult): string {
+  return result.selectedImages[0]?.art ?? '';
+}
+
+export function createSavedCollageRecord(
+  result: CollageBuildResult,
+  query: string,
+  options: {
+    id: string;
+    now?: Date;
+    mode?: SavedCollageMode;
+  },
+): SavedCollageRecord {
+  const timestamp = (options.now ?? new Date()).toISOString();
+  return {
+    id: options.id,
+    title: getCollageTitle(result),
+    query: normalizeInput(query),
+    thumb: getCollageThumb(result),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    mode: options.mode ?? 'autosave',
+    result: withAlternates(result),
+  };
+}
+
+export function upsertSavedCollageRecord(
+  collages: SavedCollageRecord[],
+  nextItem: SavedCollageRecord,
+): SavedCollageRecord[] {
+  const filtered = collages.filter((item) => item.id !== nextItem.id);
+  return [nextItem, ...filtered].slice(0, MAX_SAVED_COLLAGES);
+}
+
+export function updateSavedCollageRecord(
+  collages: SavedCollageRecord[],
+  collageId: string,
+  result: CollageBuildResult,
+  now = new Date(),
+): SavedCollageRecord[] {
+  const current = collages.find((item) => item.id === collageId);
+  if (!current) return collages;
+
+  return upsertSavedCollageRecord(collages, {
+    ...current,
+    title: getCollageTitle(result),
+    thumb: getCollageThumb(result),
+    updatedAt: now.toISOString(),
+    result: withAlternates(result),
+  });
+}
+
+export function duplicateSavedCollageRecord(
+  collages: SavedCollageRecord[],
+  collageId: string,
+  options: {
+    id: string;
+    now?: Date;
+  },
+): { collages: SavedCollageRecord[]; duplicate?: SavedCollageRecord } {
+  const current = collages.find((item) => item.id === collageId);
+  if (!current) return { collages };
+
+  const timestamp = (options.now ?? new Date()).toISOString();
+  const duplicate: SavedCollageRecord = {
+    ...current,
+    id: options.id,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    mode: 'copy',
+    result: withAlternates(current.result),
+  };
+
+  return {
+    collages: upsertSavedCollageRecord(collages, duplicate),
+    duplicate,
+  };
 }
 
 export function findReplacementCandidate(
@@ -83,9 +163,9 @@ export function replaceRemovedImage(
         replacement,
       }
     : {
-      selectedImages: nextSelected,
-      alternateCandidates: buildAlternateCandidates(candidatePool, nextSelected, 30, removed.type),
-    };
+        selectedImages: nextSelected,
+        alternateCandidates: buildAlternateCandidates(candidatePool, nextSelected, 30, removed.type),
+      };
 }
 
 export function withAlternates(result: CollageBuildResult): CollageBuildResult {
@@ -129,8 +209,40 @@ export function refreshCollageResult(result: CollageBuildResult): CollageBuildRe
 
   return {
     ...result,
+    candidatePool: adjustedPool,
     selectedImages: refreshed,
-    alternateCandidates: buildAlternateCandidates(result.candidatePool, refreshed),
+    alternateCandidates: buildAlternateCandidates(adjustedPool, refreshed),
+  };
+}
+
+function clampFocalPoint(value: number): number {
+  return Math.min(95, Math.max(5, Math.round(value * 10) / 10));
+}
+
+function updateImageFocalPoint(
+  image: ImageCandidate,
+  nextFocalPoint: [number, number],
+): ImageCandidate {
+  return {
+    ...image,
+    focalPoint: [clampFocalPoint(nextFocalPoint[0]), clampFocalPoint(nextFocalPoint[1])],
+  };
+}
+
+export function applyFocalPointToResult(
+  result: CollageBuildResult,
+  targetArt: string,
+  focalPoint: [number, number],
+): CollageBuildResult {
+  const updateCandidate = (image: ImageCandidate): ImageCandidate => (
+    image.art === targetArt ? updateImageFocalPoint(image, focalPoint) : image
+  );
+
+  return {
+    ...result,
+    selectedImages: result.selectedImages.map(updateCandidate),
+    candidatePool: result.candidatePool.map(updateCandidate),
+    alternateCandidates: result.alternateCandidates.map(updateCandidate),
   };
 }
 

@@ -1,16 +1,20 @@
 import { describe, expect, it } from 'vitest';
+import type { CollageBuildResult, ImageCandidate } from '@starter/domain';
 import {
+  applyFocalPointToResult,
   applyLocalQualityAction,
   buildCacheKey,
+  createSavedCollageRecord,
+  duplicateSavedCollageRecord,
   findReplacementCandidate,
   refreshCollageResult,
   replaceRemovedImage,
   swapSelectedImage,
   swapWorstSelectedImage,
-  upsertHistory,
+  updateSavedCollageRecord,
+  upsertSavedCollageRecord,
   withAlternates,
 } from './state.js';
-import type { CollageBuildResult, ImageCandidate } from '@starter/domain';
 
 function image(overrides: Partial<ImageCandidate> = {}): ImageCandidate {
   return {
@@ -21,18 +25,114 @@ function image(overrides: Partial<ImageCandidate> = {}): ImageCandidate {
   };
 }
 
+function collageResult(overrides: Partial<CollageBuildResult> = {}): CollageBuildResult {
+  const selectedImages = overrides.selectedImages ?? [image({ art: 'https://example.com/a.jpg', score: 90 })];
+  const candidatePool = overrides.candidatePool ?? [
+    ...selectedImages,
+    image({ art: 'https://example.com/b.jpg', score: 80 }),
+  ];
+
+  return {
+    artist: { artistName: 'Sabrina Carpenter', artistId: 1, albumFilter: null },
+    selectedImages,
+    candidatePool,
+    alternateCandidates: overrides.alternateCandidates ?? [],
+    albums: overrides.albums ?? [],
+    ...overrides,
+  };
+}
+
 describe('web collage state helpers', () => {
   it('normalizes cache keys from queries', () => {
     expect(buildCacheKey('  Sabrina   Carpenter  ')).toBe('acm_sabrina_carpenter');
   });
 
-  it('upserts history without duplicates and caps length', () => {
-    const initial = [{ name: 'Sabrina Carpenter', thumb: 'a', query: 'Sabrina Carpenter' }];
-    const updated = upsertHistory(initial, { name: 'Sabrina Carpenter — Short n Sweet', thumb: 'b', query: 'Sabrina Carpenter Short n Sweet' });
-    expect(updated).toEqual([
-      { name: 'Sabrina Carpenter — Short n Sweet', thumb: 'b', query: 'Sabrina Carpenter Short n Sweet' },
-      { name: 'Sabrina Carpenter', thumb: 'a', query: 'Sabrina Carpenter' },
-    ]);
+  it('creates a saved collage record with browser-local autosave metadata', () => {
+    const result = collageResult();
+    const saved = createSavedCollageRecord(result, ' Sabrina Carpenter ', {
+      id: 'collage-1',
+      now: new Date('2026-03-29T14:00:00.000Z'),
+    });
+
+    expect(saved).toMatchObject({
+      id: 'collage-1',
+      query: 'Sabrina Carpenter',
+      title: 'Sabrina Carpenter',
+      mode: 'autosave',
+      thumb: 'https://example.com/a.jpg',
+      createdAt: '2026-03-29T14:00:00.000Z',
+      updatedAt: '2026-03-29T14:00:00.000Z',
+    });
+  });
+
+  it('keeps multiple collages for the same artist instead of replacing earlier drafts', () => {
+    const base = collageResult();
+    const first = createSavedCollageRecord(base, 'Billie Eilish', {
+      id: 'draft-1',
+      now: new Date('2026-03-29T10:00:00.000Z'),
+    });
+    const second = createSavedCollageRecord(base, 'Billie Eilish', {
+      id: 'draft-2',
+      now: new Date('2026-03-29T10:05:00.000Z'),
+    });
+
+    const saved = upsertSavedCollageRecord([first], second);
+
+    expect(saved).toHaveLength(2);
+    expect(saved.map((item) => item.id)).toEqual(['draft-2', 'draft-1']);
+  });
+
+  it('updates an active saved collage and moves it to the front', () => {
+    const first = createSavedCollageRecord(collageResult(), 'Sabrina Carpenter', {
+      id: 'draft-1',
+      now: new Date('2026-03-29T10:00:00.000Z'),
+    });
+    const second = createSavedCollageRecord(
+      collageResult({
+        artist: { artistName: 'Taylor Swift', artistId: 2, albumFilter: null },
+        selectedImages: [image({ art: 'https://example.com/taylor.jpg', score: 92 })],
+        candidatePool: [image({ art: 'https://example.com/taylor.jpg', score: 92 })],
+      }),
+      'Taylor Swift',
+      {
+        id: 'draft-2',
+        now: new Date('2026-03-29T11:00:00.000Z'),
+      },
+    );
+
+    const updated = updateSavedCollageRecord(
+      [second, first],
+      'draft-1',
+      collageResult({
+        selectedImages: [image({ art: 'https://example.com/updated.jpg', score: 95 })],
+        candidatePool: [image({ art: 'https://example.com/updated.jpg', score: 95 })],
+      }),
+      new Date('2026-03-29T12:00:00.000Z'),
+    );
+
+    expect(updated[0]?.id).toBe('draft-1');
+    expect(updated[0]?.thumb).toBe('https://example.com/updated.jpg');
+    expect(updated[0]?.updatedAt).toBe('2026-03-29T12:00:00.000Z');
+  });
+
+  it('duplicates an existing collage into a save copy', () => {
+    const original = createSavedCollageRecord(collageResult(), 'Sabrina Carpenter', {
+      id: 'draft-1',
+      now: new Date('2026-03-29T10:00:00.000Z'),
+    });
+
+    const duplicated = duplicateSavedCollageRecord([original], 'draft-1', {
+      id: 'draft-2',
+      now: new Date('2026-03-29T10:15:00.000Z'),
+    });
+
+    expect(duplicated.duplicate).toMatchObject({
+      id: 'draft-2',
+      mode: 'copy',
+      title: 'Sabrina Carpenter',
+      updatedAt: '2026-03-29T10:15:00.000Z',
+    });
+    expect(duplicated.collages).toHaveLength(2);
   });
 
   it('finds a high scoring replacement candidate', () => {
@@ -90,16 +190,9 @@ describe('web collage state helpers', () => {
   });
 
   it('ensures alternate candidates are refreshed for cached results', () => {
-    const result: CollageBuildResult = {
-      artist: { artistName: 'Sabrina Carpenter', artistId: 1, albumFilter: null },
-      selectedImages: [image({ art: 'https://example.com/a.jpg', score: 90 })],
-      candidatePool: [
-        image({ art: 'https://example.com/a.jpg', score: 90 }),
-        image({ art: 'https://example.com/b.jpg', score: 80 }),
-      ],
+    const result = collageResult({
       alternateCandidates: [],
-      albums: [],
-    };
+    });
 
     expect(withAlternates(result).alternateCandidates).toHaveLength(1);
   });
@@ -129,6 +222,21 @@ describe('web collage state helpers', () => {
 
     expect(refreshed.selectedImages.some((imageCandidate) => imageCandidate.art === 'https://example.com/e.jpg')).toBe(true);
     expect(refreshed.selectedImages).not.toEqual(result.selectedImages);
+  });
+
+  it('stores crop adjustments on both the selected collage and the candidate pool', () => {
+    const result = collageResult({
+      selectedImages: [image({ art: 'https://example.com/a.jpg', score: 90, focalPoint: [50, 30] })],
+      candidatePool: [
+        image({ art: 'https://example.com/a.jpg', score: 90, focalPoint: [50, 30] }),
+        image({ art: 'https://example.com/b.jpg', score: 80 }),
+      ],
+    });
+
+    const updated = applyFocalPointToResult(result, 'https://example.com/a.jpg', [62.4, -10]);
+
+    expect(updated.selectedImages[0]?.focalPoint).toEqual([62.4, 5]);
+    expect(updated.candidatePool[0]?.focalPoint).toEqual([62.4, 5]);
   });
 
   it('applies local quality actions so rejected and swapped-out images stop resurfacing', () => {

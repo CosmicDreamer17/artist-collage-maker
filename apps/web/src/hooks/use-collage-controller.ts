@@ -6,22 +6,26 @@ import { buildAlternateCandidates, normalizeArtistName } from '@starter/domain';
 import { buildCollage, getHealth, getRenderableImageUrl, recordSignal } from '../lib/api.js';
 import { enhanceCollageWithFaceDetection } from '../lib/face-detection.js';
 import {
+  applyFocalPointToResult,
   applyLocalQualityAction,
   buildCacheKey,
+  createSavedCollageRecord,
   refreshCollageResult,
   replaceRemovedImage,
   swapSelectedImage,
   swapWorstSelectedImage,
-  upsertHistory,
+  updateSavedCollageRecord,
   withAlternates,
+  upsertSavedCollageRecord,
 } from '../lib/state.js';
 import {
+  ACTIVE_COLLAGE_KEY,
   ARTIST_THEMES,
   CACHE_TTL,
   DEFAULT_THEME,
-  HISTORY_KEY,
+  SAVED_COLLAGES_KEY,
   type ArtistTheme,
-  type HistoryItem,
+  type SavedCollageRecord,
 } from '../lib/constants.js';
 
 function loadCachedResult(query: string): CollageBuildResult | null {
@@ -43,14 +47,55 @@ function storeCachedResult(query: string, result: CollageBuildResult): void {
   try {
     localStorage.setItem(buildCacheKey(query), JSON.stringify({ ts: Date.now(), data: result }));
   } catch {
-    // Ignore storage quota errors.
+    // Ignore storage quota errors for the transient cache.
   }
 }
+
+function loadSavedCollages(): SavedCollageRecord[] {
+  try {
+    const raw = localStorage.getItem(SAVED_COLLAGES_KEY);
+    if (!raw) return [];
+    return (JSON.parse(raw) as SavedCollageRecord[]).map((item) => ({
+      ...item,
+      result: withAlternates(item.result),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function loadActiveCollageId(): string | null {
+  try {
+    return localStorage.getItem(ACTIVE_COLLAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function createCollageId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `collage-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function formatSavedTime(value: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value));
+}
+
+type SaveState = 'saved' | 'error';
 
 interface CollageController {
   artistInput: string;
   setArtistInput: (value: string) => void;
-  history: HistoryItem[];
+  savedCollages: SavedCollageRecord[];
+  activeCollageId: string | null;
   loading: boolean;
   loaderMsg: string;
   error: boolean;
@@ -58,15 +103,20 @@ interface CollageController {
   result: CollageBuildResult | null;
   theme: ArtistTheme;
   collageSubtitle: string;
+  saveState: SaveState;
+  saveStatusLabel: string | null;
+  saveStatusDetail: string | null;
   artistInputRef: React.RefObject<HTMLInputElement | null>;
   selectedSwapTargetArt: string | null;
   selectedSwapTargetLabel: string | null;
   handleSubmit: (event?: React.FormEvent) => void;
   handleQuickPick: (name: string) => void;
-  handleHistoryClick: (item: HistoryItem) => void;
-  handleClearHistory: () => void;
+  handleSavedCollageClick: (item: SavedCollageRecord) => void;
+  handleClearSavedCollages: () => void;
+  handleSaveCopy: () => void;
   handleRefresh: () => void;
   handleSelectTile: (image: ImageCandidate) => void;
+  handleAdjustTilePosition: (image: ImageCandidate, focalPoint: [number, number]) => void;
   handleRemoveTile: (image: ImageCandidate) => void;
   handleSwapCandidate: (image: ImageCandidate) => void;
   renderImageUrl: (image: Pick<ImageCandidate, 'art' | 'src'>) => string;
@@ -74,28 +124,53 @@ interface CollageController {
 
 export function useCollageController(): CollageController {
   const [artistInput, setArtistInput] = useState('');
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [savedCollages, setSavedCollages] = useState<SavedCollageRecord[]>([]);
+  const [activeCollageId, setActiveCollageId] = useState<string | null>(null);
   const [result, setResult] = useState<CollageBuildResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [loaderMsg, setLoaderMsg] = useState('Searching for artist...');
   const [error, setError] = useState(false);
-  const [hasResults, setHasResults] = useState(false);
   const [dbAvailable, setDbAvailable] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>('saved');
   const [selectedSwapTargetArt, setSelectedSwapTargetArt] = useState<string | null>(null);
 
   const artistInputRef = useRef<HTMLInputElement>(null);
+  const savedCollagesRef = useRef<SavedCollageRecord[]>([]);
+  const activeCollageIdRef = useRef<string | null>(null);
+
+  const hasResults = result !== null;
 
   const theme = useMemo(() => {
     if (!result) return DEFAULT_THEME;
     return ARTIST_THEMES[normalizeArtistName(result.artist.artistName)] ?? DEFAULT_THEME;
   }, [result]);
 
+  const activeSavedCollage = useMemo(
+    () => savedCollages.find((item) => item.id === activeCollageId) ?? null,
+    [savedCollages, activeCollageId],
+  );
+
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      setHistory(raw ? (JSON.parse(raw) as HistoryItem[]) : []);
-    } catch {
-      setHistory([]);
+    savedCollagesRef.current = savedCollages;
+  }, [savedCollages]);
+
+  useEffect(() => {
+    activeCollageIdRef.current = activeCollageId;
+  }, [activeCollageId]);
+
+  useEffect(() => {
+    const nextSavedCollages = loadSavedCollages();
+    const storedActiveId = loadActiveCollageId();
+    const initialActive = nextSavedCollages.find((item) => item.id === storedActiveId) ?? nextSavedCollages[0] ?? null;
+
+    savedCollagesRef.current = nextSavedCollages;
+    setSavedCollages(nextSavedCollages);
+
+    if (initialActive) {
+      activeCollageIdRef.current = initialActive.id;
+      setActiveCollageId(initialActive.id);
+      setArtistInput(initialActive.query);
+      setResult(withAlternates(initialActive.result));
     }
 
     void getHealth()
@@ -120,59 +195,118 @@ export function useCollageController(): CollageController {
       : `${result.selectedImages.length} images`;
   }, [result]);
 
+  const saveStatusLabel = useMemo(() => {
+    if (!activeSavedCollage) return null;
+    if (saveState === 'error') return 'Local save failed';
+    return activeSavedCollage.mode === 'copy'
+      ? 'Saved copy on this device'
+      : 'Autosaved on this device';
+  }, [activeSavedCollage, saveState]);
+
+  const saveStatusDetail = useMemo(() => {
+    if (!activeSavedCollage) return null;
+    if (saveState === 'error') {
+      return 'Keep this tab open while we retry writing changes to local storage.';
+    }
+    return `Last update ${formatSavedTime(activeSavedCollage.updatedAt)}`;
+  }, [activeSavedCollage, saveState]);
+
+  const persistActiveCollageId = (nextId: string | null): void => {
+    activeCollageIdRef.current = nextId;
+    setActiveCollageId(nextId);
+
+    try {
+      if (nextId) {
+        localStorage.setItem(ACTIVE_COLLAGE_KEY, nextId);
+      } else {
+        localStorage.removeItem(ACTIVE_COLLAGE_KEY);
+      }
+    } catch {
+      setSaveState('error');
+    }
+  };
+
+  const persistSavedCollages = (nextCollages: SavedCollageRecord[]): SavedCollageRecord[] => {
+    savedCollagesRef.current = nextCollages;
+    setSavedCollages(nextCollages);
+
+    try {
+      if (nextCollages.length === 0) {
+        localStorage.removeItem(SAVED_COLLAGES_KEY);
+      } else {
+        localStorage.setItem(SAVED_COLLAGES_KEY, JSON.stringify(nextCollages));
+      }
+      setSaveState('saved');
+    } catch {
+      setSaveState('error');
+    }
+
+    return nextCollages;
+  };
+
+  const activateSavedCollage = (item: SavedCollageRecord): void => {
+    persistActiveCollageId(item.id);
+    setArtistInput(item.query);
+    setResult(withAlternates(item.result));
+    setError(false);
+    setLoading(false);
+    setSelectedSwapTargetArt(null);
+  };
+
+  const autosaveResult = (nextResult: CollageBuildResult): void => {
+    const currentId = activeCollageIdRef.current;
+    if (!currentId) return;
+    const nextCollages = updateSavedCollageRecord(savedCollagesRef.current, currentId, nextResult);
+    persistSavedCollages(nextCollages);
+  };
+
+  const createAndActivateCollage = (
+    nextResult: CollageBuildResult,
+    query: string,
+    mode: 'autosave' | 'copy' = 'autosave',
+  ): void => {
+    const entry = createSavedCollageRecord(nextResult, query, {
+      id: createCollageId(),
+      mode,
+    });
+    persistSavedCollages(upsertSavedCollageRecord(savedCollagesRef.current, entry));
+    activateSavedCollage(entry);
+  };
+
   const runSearch = async (query: string): Promise<void> => {
-    if (!query.trim()) return;
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) return;
 
     setLoading(true);
     setError(false);
-    setHasResults(false);
-    setResult(null);
     setLoaderMsg('Searching for artist...');
 
     try {
-      const cached = loadCachedResult(query);
+      const cached = loadCachedResult(normalizedQuery);
       if (cached) {
         startTransition(() => {
-          setResult(cached);
-          setHasResults(true);
-          setLoading(false);
-          setSelectedSwapTargetArt(null);
+          createAndActivateCollage(cached, normalizedQuery);
         });
+        setLoading(false);
         return;
       }
 
       setLoaderMsg('Gathering images from multiple sources...');
-      const apiResult = await buildCollage(query, 18);
+      const apiResult = await buildCollage(normalizedQuery, 18);
 
       setLoaderMsg('Analyzing image quality...');
       const enhanced = await enhanceCollageWithFaceDetection(apiResult);
-      const finalized = {
+      const finalized = withAlternates({
         ...enhanced,
         alternateCandidates: buildAlternateCandidates(enhanced.candidatePool, enhanced.selectedImages),
-      };
-
-      storeCachedResult(query, finalized);
-
-      const historyName = finalized.artist.albumFilter
-        ? `${finalized.artist.artistName} — ${finalized.artist.albumFilter}`
-        : finalized.artist.artistName;
-      const thumb = finalized.selectedImages[0] ? getRenderableImageUrl(finalized.selectedImages[0]) : '';
-
-      startTransition(() => {
-        setResult(finalized);
-        setHasResults(true);
-        setLoading(false);
-        setSelectedSwapTargetArt(null);
       });
 
-      if (thumb) {
-        const queryValue = finalized.artist.albumFilter
-          ? `${finalized.artist.artistName} ${finalized.artist.albumFilter}`
-          : finalized.artist.artistName;
-        const nextHistory = upsertHistory(history, { name: historyName, thumb, query: queryValue });
-        setHistory(nextHistory);
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(nextHistory));
-      }
+      storeCachedResult(normalizedQuery, finalized);
+
+      startTransition(() => {
+        createAndActivateCollage(finalized, normalizedQuery);
+      });
+      setLoading(false);
     } catch {
       setLoading(false);
       setError(true);
@@ -189,31 +323,42 @@ export function useCollageController(): CollageController {
     void runSearch(name);
   };
 
-  const handleHistoryClick = (item: HistoryItem): void => {
-    const query = item.query ?? item.name;
-    setArtistInput(query);
-    void runSearch(query);
+  const handleSavedCollageClick = (item: SavedCollageRecord): void => {
+    activateSavedCollage(item);
   };
 
-  const handleClearHistory = (): void => {
-    setHistory([]);
-    localStorage.removeItem(HISTORY_KEY);
+  const handleClearSavedCollages = (): void => {
+    persistSavedCollages([]);
+    persistActiveCollageId(null);
+    setResult(null);
+    setArtistInput('');
+    setError(false);
+    setSelectedSwapTargetArt(null);
+  };
+
+  const handleSaveCopy = (): void => {
+    if (!result) return;
+    const query = activeSavedCollage?.query ?? artistInput.trim() ?? result.artist.artistName;
+    createAndActivateCollage(result, query || result.artist.artistName, 'copy');
   };
 
   const handleRefresh = (): void => {
     if (!result) return;
     const refreshed = refreshCollageResult(result);
-    const query = result.artist.albumFilter
-      ? `${result.artist.artistName} ${result.artist.albumFilter}`
-      : result.artist.artistName;
-    localStorage.removeItem(buildCacheKey(query));
-    storeCachedResult(query, refreshed);
     setResult(refreshed);
     setSelectedSwapTargetArt(null);
+    autosaveResult(refreshed);
   };
 
   const handleSelectTile = (image: ImageCandidate): void => {
     setSelectedSwapTargetArt((current) => (current === image.art ? null : image.art));
+  };
+
+  const handleAdjustTilePosition = (image: ImageCandidate, focalPoint: [number, number]): void => {
+    if (!result) return;
+    const updated = applyFocalPointToResult(result, image.art, focalPoint);
+    setResult(updated);
+    autosaveResult(updated);
   };
 
   const handleRemoveTile = (image: ImageCandidate): void => {
@@ -231,13 +376,16 @@ export function useCollageController(): CollageController {
       ? applyLocalQualityAction(updatedPool, replacementState.replacement.art, 'swap_in')
       : updatedPool;
 
-    setResult({
+    const nextResult = {
       ...result,
       candidatePool: finalPool,
       selectedImages: replacementState.selectedImages,
       alternateCandidates: buildAlternateCandidates(finalPool, replacementState.selectedImages),
-    });
+    };
+
+    setResult(nextResult);
     setSelectedSwapTargetArt((current) => (current === image.art ? null : current));
+    autosaveResult(nextResult);
   };
 
   const handleSwapCandidate = (image: ImageCandidate): void => {
@@ -261,19 +409,23 @@ export function useCollageController(): CollageController {
     }
     nextPool = applyLocalQualityAction(nextPool, image.art, 'swap_in');
 
-    setResult({
+    const nextResult = {
       ...result,
       candidatePool: nextPool,
       selectedImages: swapped.selectedImages,
       alternateCandidates: buildAlternateCandidates(nextPool, swapped.selectedImages),
-    });
+    };
+
+    setResult(nextResult);
     setSelectedSwapTargetArt(null);
+    autosaveResult(nextResult);
   };
 
   return {
     artistInput,
     setArtistInput,
-    history,
+    savedCollages,
+    activeCollageId,
     loading,
     loaderMsg,
     error,
@@ -281,6 +433,9 @@ export function useCollageController(): CollageController {
     result,
     theme,
     collageSubtitle,
+    saveState,
+    saveStatusLabel,
+    saveStatusDetail,
     artistInputRef,
     selectedSwapTargetArt,
     selectedSwapTargetLabel: selectedSwapTargetArt
@@ -288,10 +443,12 @@ export function useCollageController(): CollageController {
       : null,
     handleSubmit,
     handleQuickPick,
-    handleHistoryClick,
-    handleClearHistory,
+    handleSavedCollageClick,
+    handleClearSavedCollages,
+    handleSaveCopy,
     handleRefresh,
     handleSelectTile,
+    handleAdjustTilePosition,
     handleRemoveTile,
     handleSwapCandidate,
     renderImageUrl: getRenderableImageUrl,

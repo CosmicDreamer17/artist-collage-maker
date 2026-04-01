@@ -1,6 +1,6 @@
-# High-Performance DDD & Hexagonal TypeScript Monorepo
+# Artist Collage Maker
 
-A production-ready starter template designed for autonomous AI agents and senior engineers. It enforces strict physical boundaries between the Domain, Application, and Infrastructure layers using Turborepo, pnpm workspaces, and dependency-cruiser.
+A full-stack app for generating printable artist photo collages. Sources images from iTunes, Wikipedia, Discogs, and Openverse, scores and deduplicates them, then composes a layout optimized for print. Built with DDD & Hexagonal architecture using Turborepo, pnpm workspaces, and dependency-cruiser.
 
 ## 🏗 Architecture & Dependency Flow
 
@@ -12,10 +12,10 @@ This monorepo follows the **Hexagonal (Ports and Adapters)** architecture. The d
 | Package | Responsibility | Restrictions |
 | :--- | :--- | :--- |
 | `@starter/domain` | Business Logic, Entities, Branded Types, Zod Schemas. | **Pure Logic.** Zero external dependencies (except Zod). |
-| `@starter/application` | Ports (Interfaces), Use Cases (`RegisterUserUseCase`), Result types. | No DB-specific logic. No Web/HTTP logic. |
+| `@starter/application` | Ports (Interfaces), Use Cases (`BuildCollageUseCase`), Result types. | No DB-specific logic. No Web/HTTP logic. |
 | `@starter/infra` | Database implementation (Drizzle), External Clients. Env validation at startup. | Implements `@starter/application` ports. |
-| `apps/api` | Hono Web Server. `createApp(repo)` factory for DI. Composition roots: `dev.ts` (local), `vercel.ts` (production). | Routes requests to Application use cases via injected ports. |
-| `apps/web` | Next.js Frontend, UI Components. | Zero-drift types via Hono RPC. |
+| `apps/api` | Hono Web Server. `createApp(deps)` factory for DI. Composition roots: `dev.ts` (local), `vercel.ts` (production). | Routes requests to Application use cases via injected ports. |
+| `apps/web` | Next.js Frontend, UI Components. | Consumes API via fetch client with Zod validation. |
 
 ## 🛠 Tech Stack
 
@@ -24,7 +24,7 @@ This monorepo follows the **Hexagonal (Ports and Adapters)** architecture. The d
 - **Monorepo**: Turborepo + pnpm Workspaces
 - **ORM**: Drizzle ORM + libSQL/SQLite
 - **Validation**: Zod (Everywhere)
-- **Type Safety**: Branded Types for IDs, Hono RPC for Frontend/Backend bridge.
+- **Type Safety**: Branded Types for IDs (`ImageUrl`), Zod validation at all boundaries.
 - **Verification**: Dependency Cruiser (Boundaries), Knip (Dead Code), Vitest (Testing), ESLint (Strict).
 
 ## 🚀 Getting Started
@@ -71,10 +71,9 @@ This monorepo follows the **Hexagonal (Ports and Adapters)** architecture. The d
 This repository is optimized for AI-only maintenance:
 
 - **Strict Boundaries**: `.dependency-cruiser.cjs` ensures an agent cannot accidentally import infra into domain.
-- **Branded Types**: All IDs use branded types (e.g., `UserId`) to prevent primitive obsession and mixing up IDs.
+- **Branded Types**: All IDs use branded types (e.g., `ImageUrl`) to prevent primitive obsession and mixing up IDs.
 - **Zod Boundaries**: Data is validated at every boundary (API request, DB result, Domain logic).
-- **Type Bridge**: The frontend `hc` client infers types directly from the API router. No code generation needed.
-- **Dependency Injection**: `createApp(repo)` factory accepts ports, making the API fully testable with in-memory implementations (no `vi.mock` needed).
+- **Dependency Injection**: `createApp(deps)` factory accepts ports, making the API fully testable with in-memory implementations (no `vi.mock` needed).
 - **Env Validation**: `DATABASE_URL` is validated via Zod at startup with clear error messages.
 - **Verification Script**: Agents must run `make verify` before submitting any change.
 
@@ -91,8 +90,8 @@ This repository is optimized for AI-only maintenance:
 │   └── web/                  # Next.js frontend
 ├── packages/
 │   ├── domain/               # Pure core logic (Branded Types, Zod Schemas)
-│   ├── application/          # Ports (UserRepository), Use Cases (RegisterUserUseCase)
-│   └── infra/                # Driven adapters (Drizzle, Neon), env validation
+│   ├── application/          # Ports (ImageRepository), Use Cases (BuildCollageUseCase)
+│   └── infra/                # Driven adapters (Drizzle, libSQL/SQLite), env validation
 ├── scripts/
 │   └── verify.sh             # Architecture & logic verification
 ├── Makefile                  # Task runner

@@ -15,12 +15,12 @@ If you are an AI agent tasked with initializing a new project from this template
 
 1.  **Physical Boundaries**: This is a Hexagonal (Ports and Adapters) Monorepo.
     - `domain`: Pure business logic. Zero external dependencies (except Zod for validation schemas).
-    - `application`: Ports (Interfaces), Use Cases (e.g., `RegisterUserUseCase`), and Result types.
+    - `application`: Ports (Interfaces), Use Cases (e.g., `BuildCollageUseCase`), and Result types.
     - `infra`: Driven adapters (Drizzle, libSQL/SQLite). Implements application ports.
     - `api`: Driving adapter. Uses `createApp(repo)` factory for dependency injection. Composition roots in `dev.ts` (local) and `vercel.ts` (production).
     - `web`: Driving adapter. Zero-drift types via Hono RPC.
 2.  **Dependency Flow**: Inward only (`api -> application -> domain`). Violations will break the build via `dependency-cruiser`. Note: `api` also depends on `infra` for its composition roots (wiring concrete adapters), but route handlers only depend on application-layer ports.
-3.  **Dependency Injection**: Use cases accept ports via constructor injection. The `createApp` factory in `apps/api/src/index.ts` accepts a `UserRepository` and wires it to use cases. Concrete adapters are instantiated only in composition roots (`dev.ts`, `vercel.ts`).
+3.  **Dependency Injection**: Use cases accept ports via constructor injection. The `createApp` factory in `apps/api/src/index.ts` accepts ports (`ImageRepository`, `QualitySignalRepository`, gateways) and wires them to use cases. Concrete adapters are instantiated only in composition roots (`dev.ts`, `vercel.ts`).
 4.  **Branded Types**: Never use raw primitives for IDs. Always use `Brand<string, 'Name'>` for type safety.
 5.  **Zod Validation**: All data crossing a layer boundary MUST be validated via Zod. Environment variables are validated at startup (see `packages/infra/src/db.ts`).
 6.  **ESM Native**: This is a `type: module` project. Relative imports MUST include the `.js` extension.

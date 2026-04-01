@@ -17,6 +17,7 @@
   "packageManager": "pnpm@10.18.3",
   "dependencies": {
     "@starter/domain": "workspace:*",
+    "html-to-image": "^1.11.13",
     "next": "^16.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"

@@ -1,5 +1,7 @@
 'use client';
 
+import { useCallback, useRef, useState } from 'react';
+import { toPng } from 'html-to-image';
 import { CandidatesPanel } from './candidates-panel.js';
 import { CollageCanvas } from './collage-canvas.js';
 import { HistorySidebar } from './history-sidebar.js';
@@ -8,6 +10,27 @@ import { useCollageController } from '../hooks/use-collage-controller.js';
 
 export function CollageApp() {
   const controller = useCollageController();
+  const collageRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = useCallback(async () => {
+    const node = collageRef.current;
+    if (!node) return;
+
+    setDownloading(true);
+    try {
+      const dataUrl = await toPng(node, { pixelRatio: 2, cacheBust: true });
+      const link = document.createElement('a');
+      const artistName = controller.result?.artist.artistName ?? 'collage';
+      link.download = `${artistName} Collage.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch {
+      // Silently fail — user can retry
+    } finally {
+      setDownloading(false);
+    }
+  }, [controller.result?.artist.artistName]);
   const currentArtistName = controller.result?.artist.artistName ?? '';
   const alternateCandidates = controller.result?.alternateCandidates ?? [];
   const selectedImages = controller.result?.selectedImages ?? [];
@@ -70,7 +93,10 @@ export function CollageApp() {
               </div>
 
               <div className={`toolbar ${controller.hasResults ? 'active' : ''}`}>
-                <button className="primary" onClick={() => window.print()}>Print Collage</button>
+                <button className="primary" onClick={handleDownload} disabled={downloading}>
+                  {downloading ? 'Saving...' : 'Save Image'}
+                </button>
+                <button onClick={() => window.print()}>Print</button>
                 <button onClick={controller.handleRefresh}>Refresh Layout</button>
                 <button
                   onClick={() => {
@@ -86,6 +112,7 @@ export function CollageApp() {
             <div className="editor-layout">
               <div className="editor-main">
                 <CollageCanvas
+                  collageRef={collageRef}
                   artistName={currentArtistName}
                   subtitle={controller.collageSubtitle}
                   theme={controller.theme}

@@ -6,6 +6,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { LAYOUT_SEQUENCE, type ArtistTheme } from '../lib/constants.js';
 
 interface CollageCanvasProps {
+  collageRef?: React.RefObject<HTMLDivElement | null>;
   artistName: string;
   subtitle: string;
   theme: ArtistTheme;
@@ -18,6 +19,7 @@ interface CollageCanvasProps {
 }
 
 export function CollageCanvas({
+  collageRef,
   artistName,
   subtitle,
   theme,
@@ -107,7 +109,7 @@ export function CollageCanvas({
 
   return (
     <div className={`collage-wrapper ${images.length > 0 ? 'active' : ''}`}>
-      <div className="collage" style={{ background: theme.collageBg }}>
+      <div ref={collageRef} className="collage" style={{ background: theme.collageBg }}>
         {theme.deco.map((emoji, index) => (
           <div key={`${emoji}-${index}`} className={`deco-corner deco-${['tl', 'tr', 'bl', 'br'][index]}`}>{emoji}</div>
         ))}

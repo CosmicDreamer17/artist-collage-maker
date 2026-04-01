@@ -7,6 +7,7 @@ import type {
   ImageCandidate,
 } from '@starter/domain';
 import { ImageUrlSchema, isExactArtistName, normalizeArtistName, scoreImageCandidate } from '@starter/domain';
+import { serperApiKey } from './db.js';
 import type {
   ArtistCatalogGateway,
   ArtistPhotoGateway,
@@ -596,6 +597,103 @@ export class OpenversePhotoGateway implements ArtistPhotoGateway {
           if (titleLower.includes('press') || titleLower.includes('portrait') || titleLower.includes('headshot')) {
             candidate.score = Math.min(100, (candidate.score ?? 0) + 6);
           }
+          if ((candidate.score ?? 0) < 28) continue;
+          photos.push(candidate);
+        }
+      } catch {
+        // Best-effort source.
+      }
+    }
+
+    return photos.sort((left, right) => (right.score ?? 0) - (left.score ?? 0));
+  }
+}
+
+interface SerperImageResult {
+  title: string;
+  imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
+  thumbnailUrl: string;
+  source: string;
+  domain: string;
+  link: string;
+}
+
+interface SerperImagesResponse {
+  images: SerperImageResult[];
+}
+
+const SERPER_JUNK_DOMAINS = new Set([
+  'pinterest.com',
+  'pinterest.co.uk',
+  'pinimg.com',
+  'redbubble.com',
+  'etsy.com',
+  'amazon.com',
+  'ebay.com',
+  'aliexpress.com',
+  'teespring.com',
+  'society6.com',
+  'cafepress.com',
+  'zazzle.com',
+  'deviantart.com',
+]);
+
+export class SerperPhotoGateway implements ArtistPhotoGateway {
+  async fetchPhotos(artistName: string): Promise<ImageCandidate[]> {
+    if (!serperApiKey) return [];
+
+    const queries = [
+      `${artistName} portrait`,
+      `${artistName} concert live`,
+      `${artistName} press photo`,
+    ];
+
+    const artistLower = normalizeArtistName(artistName);
+    const seen = new Set<string>();
+    const photos: ImageCandidate[] = [];
+
+    for (const query of queries) {
+      try {
+        const response = await fetchJson<SerperImagesResponse>(
+          'https://google.serper.dev/images',
+          {
+            method: 'POST',
+            headers: {
+              'X-API-KEY': serperApiKey,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ q: query, num: 30 }),
+          },
+        );
+
+        for (const result of response.images ?? []) {
+          if (!result.imageUrl || !result.imageWidth || !result.imageHeight) continue;
+          if (result.imageWidth < 500 || result.imageHeight < 500) continue;
+          if (seen.has(result.imageUrl)) continue;
+
+          const domain = result.domain?.toLowerCase() ?? '';
+          if ([...SERPER_JUNK_DOMAINS].some((junk) => domain.includes(junk))) continue;
+
+          seen.add(result.imageUrl);
+
+          const candidate = scoreImageCandidate(
+            {
+              art: result.imageUrl,
+              label: `${artistName} (Google Images)`,
+              title: result.title ?? '',
+              type: 'photo',
+              dims: [result.imageWidth, result.imageHeight],
+            },
+            'serper-photo',
+          );
+
+          const titleLower = normalizeArtistName(result.title ?? '');
+          if (titleLower.includes(artistLower)) {
+            candidate.score = Math.min(100, (candidate.score ?? 0) + 8);
+          }
+
           if ((candidate.score ?? 0) < 28) continue;
           photos.push(candidate);
         }

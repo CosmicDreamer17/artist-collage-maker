@@ -4,6 +4,7 @@ import {
   DrizzleQualitySignalRepository,
   ITunesGateway,
   OpenversePhotoGateway,
+  SerperPhotoGateway,
   WikimediaPhotoGateway,
 } from '@starter/infra';
 import { handle } from 'hono/vercel';
@@ -14,7 +15,7 @@ const { app } = createApp({
   signalRepository: new DrizzleQualitySignalRepository(),
   artistSearchGateway: new ITunesGateway(),
   artistCatalogGateway: new ITunesGateway(),
-  photoGateways: [new WikimediaPhotoGateway(), new OpenversePhotoGateway(), new DiscogsPhotoGateway()],
+  photoGateways: [new WikimediaPhotoGateway(), new OpenversePhotoGateway(), new DiscogsPhotoGateway(), new SerperPhotoGateway()],
 });
 
 export default handle(app);

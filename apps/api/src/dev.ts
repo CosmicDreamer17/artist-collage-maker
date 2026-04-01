@@ -5,6 +5,7 @@ import {
   DrizzleQualitySignalRepository,
   ITunesGateway,
   OpenversePhotoGateway,
+  SerperPhotoGateway,
   WikimediaPhotoGateway,
 } from '@starter/infra';
 import { createApp } from './index.js';
@@ -14,7 +15,7 @@ const { app } = createApp({
   signalRepository: new DrizzleQualitySignalRepository(),
   artistSearchGateway: new ITunesGateway(),
   artistCatalogGateway: new ITunesGateway(),
-  photoGateways: [new WikimediaPhotoGateway(), new OpenversePhotoGateway(), new DiscogsPhotoGateway()],
+  photoGateways: [new WikimediaPhotoGateway(), new OpenversePhotoGateway(), new DiscogsPhotoGateway(), new SerperPhotoGateway()],
 });
 
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3002;

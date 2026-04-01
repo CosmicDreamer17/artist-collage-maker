@@ -37,6 +37,51 @@ describe('collage policies', () => {
     expect(image.src).toBe('wiki-main');
   });
 
+  it('scores a serper-photo candidate with appropriate tags', () => {
+    const image = scoreImageCandidate(
+      {
+        art: 'https://example.com/serper.jpg',
+        title: 'Artist concert performance',
+        type: 'photo',
+        dims: [900, 1200],
+        year: new Date().getFullYear(),
+      },
+      'serper-photo',
+    );
+
+    expect(image.score).toBeGreaterThan(50);
+    expect(image.tags).toContain('press-photo');
+    expect(image.tags).toContain('high-res');
+    expect(image.src).toBe('serper-photo');
+  });
+
+  it('scores real photos higher than album art by default', () => {
+    const photo = scoreImageCandidate(
+      {
+        art: 'https://example.com/photo.jpg',
+        title: 'Artist press photo',
+        type: 'photo',
+        dims: [800, 1000],
+        year: new Date().getFullYear(),
+      },
+      'wiki-main',
+    );
+
+    const album = scoreImageCandidate(
+      {
+        art: 'https://example.com/album.jpg',
+        label: 'Album Name (2024)',
+        name: 'Album Name',
+        type: 'album',
+        dims: [600, 600],
+        year: new Date().getFullYear(),
+      },
+      'itunes-album',
+    );
+
+    expect(photo.score).toBeGreaterThan(album.score!);
+  });
+
   it('deduplicates normalized URLs', () => {
     const images = deduplicateImageCandidates([
       makeImage({ art: 'https://example.com/thumb/foo/300px-a.jpg?x=1' }),

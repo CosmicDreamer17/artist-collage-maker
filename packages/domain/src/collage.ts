@@ -12,6 +12,7 @@ export const ImageSourceSchema = z.enum([
   'wiki-search',
   'discogs-photo',
   'openverse-photo',
+  'serper-photo',
 ]);
 export type ImageSource = z.infer<typeof ImageSourceSchema>;
 
@@ -95,14 +96,15 @@ export const HealthResponseSchema = z.object({
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 
 const SOURCE_SCORES: Record<ImageSource, number> = {
-  'wiki-main': 30,
-  'itunes-album': 25,
-  'wiki-cat': 22,
-  'itunes-single': 20,
-  'itunes-video': 15,
-  'wiki-search': 8,
-  'discogs-photo': 18,
-  'openverse-photo': 24,
+  'wiki-main': 35,
+  'serper-photo': 33,
+  'openverse-photo': 30,
+  'wiki-cat': 28,
+  'discogs-photo': 22,
+  'itunes-album': 20,
+  'itunes-single': 16,
+  'itunes-video': 12,
+  'wiki-search': 10,
 };
 
 const POSITIVE_TITLE_WORDS: Record<string, number> = {
@@ -218,7 +220,7 @@ export function scoreImageCandidate(candidate: ImageCandidate, source: ImageSour
     }
     if (ratio < 0.7) tags.push('tall');
   } else if (source.startsWith('itunes')) {
-    score += 20;
+    score += 8;
     tags.push('square');
   }
 
@@ -242,6 +244,7 @@ export function scoreImageCandidate(candidate: ImageCandidate, source: ImageSour
   else if (source === 'itunes-single') tags.push('single-art');
   else if (source === 'itunes-video') tags.push('video-still');
   else if (source === 'wiki-main') tags.push('press-photo');
+  else if (source === 'serper-photo') tags.push('press-photo');
   else if (/concert|live|perform|festival|tour/.test(title)) tags.push('live-performance');
   else if (/award|premiere|carpet|gala|ceremony/.test(title)) tags.push('event-photo');
   else if (/press|promo/.test(title)) tags.push('press-photo');
@@ -252,7 +255,7 @@ export function scoreImageCandidate(candidate: ImageCandidate, source: ImageSour
   if (candidate.hasExifDate) score += 3;
   if (candidate.hasCategoryMatch) score += 3;
   if (candidate.descLength && candidate.descLength > 20) score += 2;
-  if (source.startsWith('itunes')) score += 10;
+  if (source.startsWith('itunes')) score += 3;
 
   if (candidate.year) {
     const age = new Date().getFullYear() - candidate.year;
@@ -466,6 +469,7 @@ function scoreAlternateCandidate(image: ImageCandidate, preferredType?: ImageTyp
   if (tags.has('high-res')) score += 5;
   if (tags.has('cached-prior')) score += 8;
   if (image.src === 'openverse-photo') score += 10;
+  if (image.src === 'serper-photo') score += 10;
   if (image.src === 'wiki-main') score += 8;
   if (image.src === 'wiki-cat') score += 6;
 

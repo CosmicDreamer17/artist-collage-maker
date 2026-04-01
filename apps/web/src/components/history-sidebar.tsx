@@ -39,11 +39,13 @@ export function HistorySidebar({
       <div className="history-subcopy">Auto-saved in this browser so edits do not disappear.</div>
       <div className="history-list">
         {savedCollages.map((item) => (
-          <button
+          <div
             key={item.id}
-            type="button"
+            role="button"
+            tabIndex={0}
             className={`history-item ${activeCollageId === item.id ? 'active' : ''}`}
             onClick={() => onSavedCollageClick(item)}
+            onKeyDown={(event) => { if (event.key === 'Enter') onSavedCollageClick(item); }}
           >
             <img
               className="history-thumb"
@@ -70,7 +72,7 @@ export function HistorySidebar({
             >
               ✕
             </button>
-          </button>
+          </div>
         ))}
       </div>
       <div className="history-clear">

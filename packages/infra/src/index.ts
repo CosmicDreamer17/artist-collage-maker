@@ -551,11 +551,11 @@ export class DiscogsPhotoGateway implements ArtistPhotoGateway {
 export class OpenversePhotoGateway implements ArtistPhotoGateway {
   async fetchPhotos(artistName: string): Promise<ImageCandidate[]> {
     const queries = [
-      `"${artistName}"`,
-      `${artistName} press photo`,
-      `${artistName} portrait`,
-      `${artistName} live`,
-      `${artistName} concert`,
+      `"${artistName}" singer`,
+      `"${artistName}" press photo`,
+      `"${artistName}" portrait musician`,
+      `"${artistName}" live concert`,
+      `"${artistName}" performing`,
     ];
 
     const artistLower = normalizeArtistName(artistName);
@@ -645,9 +645,9 @@ export class SerperPhotoGateway implements ArtistPhotoGateway {
     if (!serperApiKey) return [];
 
     const queries = [
-      `${artistName} portrait`,
-      `${artistName} concert live`,
-      `${artistName} press photo`,
+      `"${artistName}" singer portrait`,
+      `"${artistName}" concert live performance`,
+      `"${artistName}" musician press photo`,
     ];
 
     const artistLower = normalizeArtistName(artistName);

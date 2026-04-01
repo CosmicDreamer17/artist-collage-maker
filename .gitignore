@@ -1,12 +1,54 @@
+# Dependencies
 node_modules/
 .pnpm-store/
+
+# Build & cache
 .turbo/
 .next/
+out/
+dist/
+build/
 *.tsbuildinfo
-quality.db
-quality.db-shm
-quality.db-wal
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# Environment (all variants)
 .env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Secrets & keys
+*.pem
+*.key
+*.cert
+*.p12
+
+# Deployment
+.vercel/
+
+# Testing & coverage
+coverage/
+.nyc_output/
+
+# IDE & editor
+.vscode/
+.idea/
+.eslintcache
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
+pnpm-debug.log*
+
+# Misc
+*.tgz
 Screenshot *.png

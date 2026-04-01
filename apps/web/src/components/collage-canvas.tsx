@@ -146,7 +146,13 @@ export function CollageCanvas({
               onPointerCancel={handlePointerEnd}
               title={selectedTargetArt === image.art ? 'Drag to reframe, or tap again to stop editing this image' : 'Tap to edit this image'}
             >
-              <img src={renderImageUrl(image)} alt={image.label} loading={index < 6 ? 'eager' : 'lazy'} style={getImageStyle(image)} />
+              <img
+                src={renderImageUrl(image)}
+                alt={image.label}
+                loading={index < 6 ? 'eager' : 'lazy'}
+                style={getImageStyle(image)}
+                onError={(event) => { event.currentTarget.style.opacity = '0'; }}
+              />
               <div className="tile-label">{image.label}</div>
               {selectedTargetArt === image.art ? <div className="tile-target-badge">Editing</div> : null}
               <button className="tile-remove" title="Remove this image" onClick={(event) => {

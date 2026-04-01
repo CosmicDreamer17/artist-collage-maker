@@ -112,8 +112,8 @@ interface CollageController {
   handleSubmit: (event?: React.FormEvent) => void;
   handleQuickPick: (name: string) => void;
   handleSavedCollageClick: (item: SavedCollageRecord) => void;
+  handleDeleteSavedCollage: (id: string) => void;
   handleClearSavedCollages: () => void;
-  handleSaveCopy: () => void;
   handleRefresh: () => void;
   handleSelectTile: (image: ImageCandidate) => void;
   handleAdjustTilePosition: (image: ImageCandidate, focalPoint: [number, number]) => void;
@@ -327,6 +327,23 @@ export function useCollageController(): CollageController {
     activateSavedCollage(item);
   };
 
+  const handleDeleteSavedCollage = (id: string): void => {
+    const nextCollages = savedCollagesRef.current.filter((item) => item.id !== id);
+    persistSavedCollages(nextCollages);
+
+    if (activeCollageIdRef.current === id) {
+      const next = nextCollages[0];
+      if (next) {
+        activateSavedCollage(next);
+      } else {
+        persistActiveCollageId(null);
+        setResult(null);
+        setArtistInput('');
+        setSelectedSwapTargetArt(null);
+      }
+    }
+  };
+
   const handleClearSavedCollages = (): void => {
     persistSavedCollages([]);
     persistActiveCollageId(null);
@@ -334,12 +351,6 @@ export function useCollageController(): CollageController {
     setArtistInput('');
     setError(false);
     setSelectedSwapTargetArt(null);
-  };
-
-  const handleSaveCopy = (): void => {
-    if (!result) return;
-    const query = activeSavedCollage?.query ?? artistInput.trim() ?? result.artist.artistName;
-    createAndActivateCollage(result, query || result.artist.artistName, 'copy');
   };
 
   const handleRefresh = (): void => {
@@ -444,8 +455,8 @@ export function useCollageController(): CollageController {
     handleSubmit,
     handleQuickPick,
     handleSavedCollageClick,
+    handleDeleteSavedCollage,
     handleClearSavedCollages,
-    handleSaveCopy,
     handleRefresh,
     handleSelectTile,
     handleAdjustTilePosition,

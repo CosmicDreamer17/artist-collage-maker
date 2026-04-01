@@ -61,7 +61,7 @@ export async function recordSignal(url: string, artist: string, action: QualityS
 }
 
 export function getRenderableImageUrl(image: Pick<ImageCandidate, 'art' | 'src'>): string {
-  if (image.src === 'discogs-photo') {
+  if (image.src === 'discogs-photo' || image.src === 'serper-photo') {
     return `${buildApiUrl('/api/proxy/image')}?url=${encodeURIComponent(image.art)}`;
   }
 

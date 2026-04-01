@@ -36,6 +36,7 @@ export function CollageApp() {
           savedCollages={controller.savedCollages}
           renderImageUrl={controller.renderImageUrl}
           onSavedCollageClick={controller.handleSavedCollageClick}
+          onDeleteCollage={controller.handleDeleteSavedCollage}
           onClearHistory={controller.handleClearSavedCollages}
         />
 
@@ -71,7 +72,6 @@ export function CollageApp() {
               <div className={`toolbar ${controller.hasResults ? 'active' : ''}`}>
                 <button className="primary" onClick={() => window.print()}>Print Collage</button>
                 <button onClick={controller.handleRefresh}>Refresh Layout</button>
-                <button onClick={controller.handleSaveCopy}>Save Copy</button>
                 <button
                   onClick={() => {
                     controller.artistInputRef.current?.focus();

@@ -470,6 +470,26 @@ body.theme-ariana-grande .main-content {
 }
 
 .history-item:hover { background: var(--surface-hover); }
+.history-item:hover .history-delete { opacity: 1; }
+
+.history-delete {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+.history-delete:hover { color: var(--text); background: var(--surface-hover); }
 
 .history-item.active {
   background: var(--accent-soft);

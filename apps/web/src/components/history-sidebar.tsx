@@ -8,6 +8,7 @@ interface HistorySidebarProps {
   savedCollages: SavedCollageRecord[];
   renderImageUrl: (image: Pick<ImageCandidate, 'art' | 'src'>) => string;
   onSavedCollageClick: (item: SavedCollageRecord) => void;
+  onDeleteCollage: (id: string) => void;
   onClearHistory: () => void;
 }
 
@@ -25,6 +26,7 @@ export function HistorySidebar({
   savedCollages,
   renderImageUrl,
   onSavedCollageClick,
+  onDeleteCollage,
   onClearHistory,
 }: HistorySidebarProps) {
   return (
@@ -57,6 +59,17 @@ export function HistorySidebar({
                 {item.mode === 'copy' ? 'Saved copy' : 'Autosaved'} · {formatUpdatedAt(item.updatedAt)}
               </span>
             </span>
+            <button
+              type="button"
+              className="history-delete"
+              title="Remove from history"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDeleteCollage(item.id);
+              }}
+            >
+              ✕
+            </button>
           </button>
         ))}
       </div>

@@ -66,7 +66,6 @@ export function CollageApp() {
         <main className="main-content">
           <SearchPanel
             artistInput={controller.artistInput}
-            hasResults={controller.hasResults}
             inputRef={controller.artistInputRef}
             onArtistInputChange={controller.setArtistInput}
             onSubmit={controller.handleSubmit}

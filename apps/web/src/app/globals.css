@@ -690,7 +690,13 @@ body.has-results .brand p {
 }
 
 body.has-results .quick-picks {
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
+  max-width: 680px;
+}
+
+body.has-results .quick-pick-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
 }
 
 .quick-picks-label {

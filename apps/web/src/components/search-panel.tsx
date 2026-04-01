@@ -4,7 +4,6 @@ import { ARTIST_THEMES, DEFAULT_THEME, QUICK_PICKS } from '../lib/constants.js';
 
 interface SearchPanelProps {
   artistInput: string;
-  hasResults: boolean;
   inputRef: React.RefObject<HTMLInputElement | null>;
   onArtistInputChange: (value: string) => void;
   onSubmit: (event?: React.FormEvent) => void;
@@ -13,7 +12,6 @@ interface SearchPanelProps {
 
 export function SearchPanel({
   artistInput,
-  hasResults,
   inputRef,
   onArtistInputChange,
   onSubmit,
@@ -39,18 +37,16 @@ export function SearchPanel({
         <button type="submit">Make It ✨</button>
       </form>
 
-      {!hasResults ? (
-        <div className="quick-picks">
-          <div className="quick-picks-label">or pick one</div>
-          <div className="quick-picks-grid">
-            {QUICK_PICKS.map((name) => (
-              <button key={name} type="button" className="quick-pick-btn" onClick={() => onQuickPick(name)}>
-                <span className="qp-emoji">{ARTIST_THEMES[name.toLowerCase()]?.emoji || DEFAULT_THEME.emoji}</span> {name}
-              </button>
-            ))}
-          </div>
+      <div className="quick-picks">
+        <div className="quick-picks-label">or pick one</div>
+        <div className="quick-picks-grid">
+          {QUICK_PICKS.map((name) => (
+            <button key={name} type="button" className="quick-pick-btn" onClick={() => onQuickPick(name)}>
+              <span className="qp-emoji">{ARTIST_THEMES[name.toLowerCase()]?.emoji || DEFAULT_THEME.emoji}</span> {name}
+            </button>
+          ))}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

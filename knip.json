@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@next/schema.json",
-  "ignore": ["legacy-prototype/**"],
+  "ignore": ["legacy-prototype/**", "apps/api/api/[[...route]].ts"],
   "workspaces": {
     "packages/*": {},
     "apps/api": {
